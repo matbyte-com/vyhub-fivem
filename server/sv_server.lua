@@ -20,7 +20,7 @@ function VyHub.Server:update_status()
     local user_activities = {}
 
     local data = {
-        users_max = 12,
+        users_max = VyHub.Config.max_players,
         users_current = GetNumPlayerIndices(),
         is_alive = true,
     }
