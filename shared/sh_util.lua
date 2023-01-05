@@ -170,3 +170,7 @@ end
 function VyHub.Util:endsWith(str, ending)
 	return string.find(str, ending, #str - #ending + 1, true) ~= nil
 end
+
+function VyHub.Util:timer_loop(delay, callback)
+	tmr.create():alarm(delay, tmr.ALARM_SINGLE, callback)
+end

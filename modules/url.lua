@@ -1,11 +1,11 @@
 -- net/url.lua - a robust url parser and builder
 --
--- Bertrand urlansion, 2011-2021; License urlIT
+-- Bertrand urllibansion, 2011-2021; License urllibIT
 -- @module net.url
--- @alias	url
+-- @alias	urllib
 
-url = {}
-url.version = "1.1.0"
+urllib = {}
+urllib.version = "1.1.0"
 
 --- url options
 -- - `separator` is set to `&` by default but could be anything like `&amp;amp;` or `;`
@@ -16,7 +16,7 @@ url.version = "1.1.0"
 -- @todo Add option to limit the size of the argument table
 -- @todo Add option to limit the depth of the argument table
 -- @todo Add option to process dots in parameter names, ie. `param.filter=1`
-url.options = {
+urllib.options = {
 	separator = '&',
 	cumulative_parameters = false,
 	legal_in_path = {
@@ -37,7 +37,7 @@ url.options = {
 
 --- list of known and common scheme ports
 -- as documented in <a href="http://www.iana.org/assignments/uri-schemes.html">IANA URI scheme list</a>
-url.services = {
+urllib.services = {
 	acap     = 674,
 	cap      = 1026,
 	dict     = 2628,
@@ -85,7 +85,7 @@ end
 
 -- for query values, + can mean space if configured as such
 local function decodeValue(str)
-	if url.options.query_plus_is_space then
+	if urllib.options.query_plus_is_space then
 		str = str:gsub('+', ' ')
 	end
 	return decode(str)
@@ -99,16 +99,16 @@ local function concat(a, b)
 	end
 end
 
-function url:addSegment(path)
+function urllib:addSegment(path)
 	if type(path) == 'string' then
-		self.path = self.path .. '/' .. encode(path:gsub("^/+", ""), url.options.legal_in_path)
+		self.path = self.path .. '/' .. encode(path:gsub("^/+", ""), urllib.options.legal_in_path)
 	end
 	return self
 end
 
 --- builds the url
 -- @return a string representing the built url
-function url:build()
+function urllib:build()
 	local url = ''
 	if self.path then
 		local path = self.path
@@ -122,7 +122,7 @@ function url:build()
 	end
 	if self.host then
 		local authority = self.host
-		if self.port and self.scheme and url.services[self.scheme] ~= self.port then
+		if self.port and self.scheme and urllib.services[self.scheme] ~= self.port then
 			authority = authority .. ':' .. self.port
 		end
 		local userinfo
@@ -157,10 +157,10 @@ end
 -- @param sep The separator to use (optional)
 -- @param key The parent key if the value is multi-dimensional (optional)
 -- @return a string representing the built querystring
-function url.buildQuery(tab, sep, key)
+function urllib.buildQuery(tab, sep, key)
 	local query = {}
 	if not sep then
-		sep = url.options.separator or '&'
+		sep = urllib.options.separator or '&'
 	end
 	local keys = {}
 	for k in pairs(tab) do
@@ -174,16 +174,16 @@ function url.buildQuery(tab, sep, key)
 		local value = tab[name]
 		name = encode(tostring(name), {["-"] = true, ["_"] = true, ["."] = true})
 		if key then
-			if url.options.cumulative_parameters and string.find(name, '^%d+$') then
+			if urllib.options.cumulative_parameters and string.find(name, '^%d+$') then
 				name = tostring(key)
 			else
 				name = string.format('%s[%s]', tostring(key), tostring(name))
 			end
 		end
 		if type(value) == 'table' then
-			query[#query+1] = url.buildQuery(value, sep, name)
+			query[#query+1] = urllib.buildQuery(value, sep, name)
 		else
-			local value = encode(tostring(value), url.options.legal_in_query)
+			local value = encode(tostring(value), urllib.options.legal_in_query)
 			if value ~= "" then
 				query[#query+1] = string.format('%s=%s', name, value)
 			else
@@ -199,11 +199,11 @@ end
 -- with PHP usage of brackets in key names like ?param[key]=value
 -- @param str The querystring to parse
 -- @param sep The separator between key/value pairs, defaults to `&`
--- @todo limit the max number of parameters with url.options.max_parameters
+-- @todo limit the max number of parameters with urllib.options.max_parameters
 -- @return a table representing the query key/value pairs
-function url.parseQuery(str, sep)
+function urllib.parseQuery(str, sep)
 	if not sep then
-		sep = url.options.separator or '&'
+		sep = urllib.options.separator or '&'
 	end
 
 	local values = {}
@@ -231,7 +231,7 @@ function url.parseQuery(str, sep)
 			values[key] = {}
 		elseif #keys == 0 and type(values[key]) == 'table' then
 			values[key] = decodeValue(val)
-		elseif url.options.cumulative_parameters
+		elseif urllib.options.cumulative_parameters
 			and type(values[key]) == 'string' then
 			values[key] = { values[key] }
 			table.insert(values[key], decodeValue(val))
@@ -255,19 +255,19 @@ function url.parseQuery(str, sep)
 		end
 
 	end
-	setmetatable(values, { __tostring = url.buildQuery })
+	setmetatable(values, { __tostring = urllib.buildQuery })
 	return values
 end
 
 --- set the url query
 -- @param query Can be a string to parse or a table of key/value pairs
 -- @return a table representing the query key/value pairs
-function url:setQuery(query)
+function urllib:setQuery(query)
 	local query = query
 	if type(query) == 'table' then
-		query = url.buildQuery(query)
+		query = urllib.buildQuery(query)
 	end
-	self.query = url.parseQuery(query)
+	self.query = urllib.parseQuery(query)
 	return query
 end
 
@@ -275,7 +275,7 @@ end
 -- The authority is parsed to find the user, password, port and host if available.
 -- @param authority The string representing the authority
 -- @return a string with what remains after the authority was parsed
-function url:setAuthority(authority)
+function urllib:setAuthority(authority)
 	self.authority = authority
 	self.port = nil
 	self.host = nil
@@ -359,10 +359,10 @@ end
 -- query, fragment
 -- @param url Url string
 -- @return a table with the different parts and a few other functions
-function url.parse(url)
+function urllib.parse(url)
 	local comp = {}
-	url.setAuthority(comp, "")
-	url.setQuery(comp, "")
+	urllib.setAuthority(comp, "")
+	urllib.setQuery(comp, "")
 
 	local url = tostring(url or '')
 	url = url:gsub('#(.*)$', function(v)
@@ -374,21 +374,21 @@ function url.parse(url)
 		return ''
 	end)
 	url = url:gsub('%?(.*)', function(v)
-		url.setQuery(comp, v)
+		urllib.setQuery(comp, v)
 		return ''
 	end)
 	url = url:gsub('^//([^/]*)', function(v)
-		url.setAuthority(comp, v)
+		urllib.setAuthority(comp, v)
 		return ''
 	end)
 
-	comp.path = url:gsub("([^/]+)", function (s) return encode(decode(s), url.options.legal_in_path) end)
+	comp.path = url:gsub("([^/]+)", function (s) return encode(decode(s), urllib.options.legal_in_path) end)
 
 	setmetatable(comp, {
-		__index = url,
-		__tostring = url.build,
+		__index = urllib,
+		__tostring = urllib.build,
 		__concat = concat,
-		__div = url.addSegment
+		__div = urllib.addSegment
 	})
 	return comp
 end
@@ -397,7 +397,7 @@ end
 -- This function will also remove multiple slashes
 -- @param path The string representing the path to clean
 -- @return a string of the path without unnecessary dots and segments
-function url.removeDotSegments(path)
+function urllib.removeDotSegments(path)
 	local fields = {}
 	if string.len(path) == 0 then
 		return ""
@@ -476,12 +476,12 @@ end
 --- builds a new url by using the one given as parameter and resolving paths
 -- @param other A string or a table representing a url
 -- @return a new url table
-function url:resolve(other)
+function urllib:resolve(other)
 	if type(self) == "string" then
-		self = url.parse(self)
+		self = urllib.parse(self)
 	end
 	if type(other) == "string" then
-		other = url.parse(other)
+		other = urllib.parse(other)
 	end
 	if other.scheme then
 		return other
@@ -506,9 +506,9 @@ end
 --- normalize a url path following some common normalization rules
 -- described on <a href="http://en.wikipedia.org/wiki/URL_normalization">The URL normalization page of Wikipedia</a>
 -- @return the normalized path
-function url:normalize()
+function urllib:normalize()
 	if type(self) == 'string' then
-		self = url.parse(self)
+		self = urllib.parse(self)
 	end
 	if self.path then
 		local path = self.path
@@ -519,3 +519,5 @@ function url:normalize()
 	end
 	return self
 end
+
+return urllib

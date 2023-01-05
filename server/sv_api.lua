@@ -2,13 +2,12 @@ VyHub.API = VyHub.API or {}
 
 local content_type = "application/json; charset=utf-8"
 
-function VyHub.API:request(method, url, path_params, query, headers,
-                           request_body, success, failed, no_error_for)
+function VyHub.API:request(method, url, path_params, query, headers, request_body, success, failed, no_error_for)
     url = f("%s%s", VyHub.API.url, url)
     no_error_for = no_error_for or {}
 
     if path_params ~= nil then 
-        url = f(url, unpack(path_params)) 
+        url = f(url, table.unpack(path_params)) 
     end
 
     if type(request_body) == "table" then 
@@ -16,9 +15,10 @@ function VyHub.API:request(method, url, path_params, query, headers,
     end
 
     if query ~= nil then
-        u = url.parse(url)
-        u.setQuery(query)
-        url = u
+        u = urllib.parse(url)
+        u:setQuery(query)
+        url = tostring(u:normalize())
+        print(url)
     end
 
     response_func = function(code, body, headers)
@@ -68,7 +68,7 @@ function VyHub.API:request(method, url, path_params, query, headers,
         if failed ~= nil then failed(0, reason, {}) end
     end
 
-    PerformHttpRequest(url, response_func, method, body, headers)
+    PerformHttpRequest(url, response_func, method, request_body, headers)
 end
 
 function VyHub.API:get(endpoint, path_params, query, success, failed, no_error_for)
@@ -99,8 +99,7 @@ AddEventHandler("vyhub_loading_finish", function()
             "API URL, Server ID or API Key not set! Please follow the manual.",
             "error")
 
-        Citizen.SetTimeout(60000,
-                           function()
+        SetTimeout(60000, function()
             TriggerEvent("vyhub_loading_finish")
         end)
 
