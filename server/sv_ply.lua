@@ -6,21 +6,21 @@ VyHub.Player.table = VyHub.Player.table or {}
 function VyHub.Player:initialize(ply, retry)
     if ply == nil then return end
 
-    local steamid = VyHub.Player:get_steamid(ply)
+    local license = VyHub.Player:get_license(ply)
     local nick = GetPlayerName(ply)
 
-    VyHub:msg(f("Initializing user %s, %s", nick, steamid))
+    VyHub:msg(f("Initializing user %s, %s", nick, license))
 
-    VyHub.API:get("/user/%s", {steamid}, {type = "STEAM"}, function(code, result)
-        VyHub:msg(f("Found existing user %s for steam id %s (%s).", result.id, steamid, nick), "success")
+    VyHub.API:get("/user/%s", {license}, {type = "FIVEM"}, function(code, result)
+        VyHub:msg(f("Found existing user %s for license %s (%s).", result.id, license, nick), "success")
 
-        VyHub.Player.table[steamid] = result
+        VyHub.Player.table[license] = result
 
         VyHub.Player:refresh(ply)
 
         TriggerEvent("vyhub_ply_initialized", ply)
 
-        -- local ply_timer_name = "vyhub_player_" .. steamid
+        -- local ply_timer_name = "vyhub_player_" .. license
 
         -- VyHub.Util:timer_loop(60000, function() 
             
@@ -34,7 +34,7 @@ function VyHub.Player:initialize(ply, retry)
         -- end)
     end, function(code, reason)
         if code ~= 404 then
-            VyHub:msg(f("Could not check if users %s exists. Retrying in a minute..", steamid), "error")
+            VyHub:msg(f("Could not check if users %s exists. Retrying in a minute..", license), "error")
 
             --VyHub.Util:timer_loop(60000, function() 
             --    VyHub.Player:initialize(ply)
@@ -44,7 +44,7 @@ function VyHub.Player:initialize(ply, retry)
         end
 
         if retry then
-            VyHub:msg(f("Could not create user %s. Retrying in a minute..", steamid), "error")
+            VyHub:msg(f("Could not create user %s. Retrying in a minute..", license), "error")
 
             --VyHub.Util:timer_loop(60000, function() 
             --    VyHub.Player:initialize(ply)
@@ -53,7 +53,7 @@ function VyHub.Player:initialize(ply, retry)
             return
         end
 
-        VyHub.Player:create(steamid, function()
+        VyHub.Player:create(license, function()
             VyHub.Player:initialize(ply, true)
         end, function ()
             VyHub.Player:initialize(ply, true)
@@ -61,10 +61,10 @@ function VyHub.Player:initialize(ply, retry)
     end, { 404 })
 end
 
-function VyHub.Player:create(steamid, success, err)
-    VyHub:msg(f("No existing user found for steam id %s. Creating..", steamid))
+function VyHub.Player:create(license, success, err)
+    VyHub:msg(f("No existing user found for license %s. Creating..", license))
 
-    VyHub.API:post('/user/', nil, { identifier = steamid, type = 'STEAM' }, function()
+    VyHub.API:post('/user/', nil, { identifier = license, type = 'FIVEM' }, function()
         if success then
             success()
         end
@@ -75,34 +75,34 @@ function VyHub.Player:create(steamid, success, err)
     end)
 end
 
--- Return nil if steamid is nil or API error
--- Return false if steamid is false or could not create user
-function VyHub.Player:get(steamid, callback, retry)
-    if steamid == nil then
+-- Return nil if license is nil or API error
+-- Return false if license is false or could not create user
+function VyHub.Player:get(license, callback, retry)
+    if license == nil then
         callback(nil)
         return
     end
 
-    if steamid == false then
+    if license == false then
         callback(false)
         return
     end
 
-    if VyHub.Player.table[steamid] ~= nil then
-        callback(VyHub.Player.table[steamid])
+    if VyHub.Player.table[license] ~= nil then
+        callback(VyHub.Player.table[license])
     else
-        VyHub.API:get("/user/%s", {steamid}, {type = "STEAM"}, function(code, result)
-            VyHub:msg(f("Received user %s for steam id %s.", result.id, steamid), "debug")
+        VyHub.API:get("/user/%s", {license}, {type = "FIVEM"}, function(code, result)
+            VyHub:msg(f("Received user %s for license %s.", result.id, license), "debug")
     
-            VyHub.Player.table[steamid] = result
+            VyHub.Player.table[license] = result
 
             callback(result)
         end, function(code)
-            VyHub:msg(f("Could not receive user %s.", steamid), "error")
+            VyHub:msg(f("Could not receive user %s.", license), "error")
 
             if code == 404 and retry == nil then
-                VyHub.Player:create(steamid, function ()
-                    VyHub.Player:get(steamid, callback, true)
+                VyHub.Player:create(license, function ()
+                    VyHub.Player:get(license, callback, true)
                 end, function ()
                     callback(false)
                 end)
@@ -114,11 +114,11 @@ function VyHub.Player:get(steamid, callback, retry)
 end
 
 function VyHub.Player:check_group(ply, callback)
-    local steamid = self:get_steamid(ply)
+    local license = self:get_license(ply)
     
-    VyHub.Player:get(steamid, function(user)
+    VyHub.Player:get(license, function(user)
         if not user then
-            VyHub:msg(f("Could not check groups for user %s, because no VyHub id is available.", steamid), "debug")
+            VyHub:msg(f("Could not check groups for user %s, because no VyHub id is available.", license), "debug")
             return
         end
 
@@ -134,7 +134,7 @@ function VyHub.Player:check_group(ply, callback)
             end
 
             if highest == nil then
-                VyHub:msg(f("Could not find any active group for %s (%s)", GetPlayerName(ply), steamid), "error")
+                VyHub:msg(f("Could not find any active group for %s (%s)", GetPlayerName(ply), license), "error")
                 return
             end
 
