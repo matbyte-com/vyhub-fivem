@@ -237,3 +237,11 @@ function VyHub.Player:get_steamid(player)
         end
 	end
 end
+
+function VyHub.Player:get_license(player)
+    for k, v in pairs(GetPlayerIdentifiers(player)) do
+        if string.sub(v, 1, string.len("license:")) == "license:" then
+            return v:gsub("license:", "")
+        end
+    end
+end
