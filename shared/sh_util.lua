@@ -172,7 +172,12 @@ function VyHub.Util:endsWith(str, ending)
 end
 
 function VyHub.Util:timer_loop(delay, callback)
-	tmr.create():alarm(delay, tmr.ALARM_SINGLE, callback)
+    Citizen.CreateThread(function()
+        while(true) do
+            Citizen.Wait(delay)
+            callback()
+        end
+    end)
 end
 
 function VyHub.Util:dumpTable(table, nb)
