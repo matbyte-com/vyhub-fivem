@@ -19,10 +19,30 @@ end
 function VyHub.Server:update_status()
     local user_activities = {}
 
+    for i, src in ipairs(GetPlayers()) do
+        local license = VyHub.Player:get_license(src)
+        local plyData = VyHub.Player.table[license]
+        if (plyData ~= nil) then
+            local nickname = GetPlayerName(src)
+            local coords = GetEntityCoords(GetPlayerPed(src))
+            local ping = GetPlayerPing(src)
+            table.insert(user_activities, {
+                user_id = plyData.id,
+                extra = {
+                    Nickname = nickname,
+                    License = license,
+                    Coords = f("%.2f, %.2f, %.2f", coords.x, coords.y, coords.z),
+                    Ping = f("%i ms", ping)
+                }
+            })
+        end
+    end
+
     local data = {
         users_max = VyHub.Config.max_players,
         users_current = GetNumPlayerIndices(),
         is_alive = true,
+        user_activities = user_activities
     }
 
     VyHub:msg(f("Updating status: %s", json.encode(data)), "debug")
@@ -44,7 +64,7 @@ RegisterNetEvent("vyhub_api_ready")
 AddEventHandler("vyhub_api_ready", function()
     VyHub.Server:update_status()
 
-    --VyHub.Util:timer_loop(60000, function() 
-    --    VyHub.Server:update_status()
-    --end)
+    VyHub.Util:timer_loop(60000, function() 
+        VyHub.Server:update_status()
+    end)
 end)
