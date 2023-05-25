@@ -10,6 +10,7 @@ ui_page ''
 files {}
 
 shared_scripts {
+    '@es_extended/imports.lua',
     'init.lua',
     'config/sh_config.lua',
     'shared/*.lua',
