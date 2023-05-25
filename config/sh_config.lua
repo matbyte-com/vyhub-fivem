@@ -1,1 +1,1 @@
-Vyhub.Config.framework = "ESX" -- ESX/... (TBD)
+VyHub.Config.framework = "ESX" -- ESX/... (TBD)
