@@ -79,3 +79,7 @@ AddEventHandler("vyhub_api_ready", function()
         end)
     end)
 end)
+
+AddEventHandler("vyhub_ready", function()
+    VyHub.Group:refresh()
+end)

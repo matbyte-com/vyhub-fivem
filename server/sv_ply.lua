@@ -13,7 +13,7 @@ function VyHub.Player:initialize(ply, retry)
 
     VyHub.API:get("/user/%s", {license}, {type = "FIVEM"}, function(code, result)
         VyHub:msg(f("Found existing user %s for license %s (%s).", result.id, license, nick), "success")
-
+        result.src = ply
         VyHub.Player.table[license] = result
 
         VyHub.Player:refresh(ply)
@@ -177,13 +177,13 @@ function VyHub.Player:check_group(ply, callback)
 end
 
 function VyHub.Player:refresh(ply, callback)
-    -- VyHub.Player:check_group(ply)
+    VyHub.Player:check_group(ply)
 end
 
 function VyHub.Player:get_group(ply)
-    if not IsValid(ply) then
+--[[     if not IsValid(ply) then
         return nil
-    end
+    end ]]
 
     local group = VyHub.groups_mapped[ply:GetUserGroup()]
 
@@ -195,7 +195,7 @@ function VyHub.Player:get_group(ply)
 end
 
 function VyHub.Player:check_property(ply, property)
-    if not IsValid(ply) then return false end
+--     if not IsValid(ply) then return false end 
 
     local group = VyHub.Player:get_group(ply)
 
@@ -227,6 +227,21 @@ AddEventHandler('playerConnecting', function(name, setCallback, deferrals)
     VyHub.Player:initialize(source)
 
     deferrals.done()
+end)
+
+RegisterNetEvent("vyhub-fivem:playerLoaded", function()
+    local src = source
+    local plyLicense = VyHub.Player:get_license(src)
+    local playerGroup = VyHub.Framework:getPlayerGroup(src)
+    local plyData = VyHub.Player.table[plyLicense]
+
+    VyHub.API:get("/user/%s/group", {plyData.id}, { serverbundle_id = VyHub.server.serverbundle.id }, function(code, result)
+        if(#result == 0 or result[1].name ~= playerGroup) then
+            VyHub.Group:set(plyLicense, playerGroup)
+        end
+    end, function()
+
+    end)
 end)
 
 function VyHub.Player:get_steamid(player)
