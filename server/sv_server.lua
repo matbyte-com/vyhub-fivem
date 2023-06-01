@@ -59,12 +59,23 @@ function VyHub.Server:update_status()
     )
 end
 
+function VyHub:server_data_ready()
+    VyHub:msg(string.format("I am server %s in bundle %s.", VyHub.server.name, VyHub.server.serverbundle.name))
+
+    VyHub.ready = true
+
+    TriggerEvent("vyhub_ready")
+end
 
 RegisterNetEvent("vyhub_api_ready")
 AddEventHandler("vyhub_api_ready", function()
-    VyHub.Server:update_status()
-
-    VyHub.Util:timer_loop(60000, function() 
+    VyHub.API:get("/server/%s", { VyHub.Config.server_id }, nil, function(code, result) 
+        VyHub.server = result
+        VyHub.Cache:save("server", VyHub.server)
+        VyHub:server_data_ready()
         VyHub.Server:update_status()
+        VyHub.Util:timer_loop(60000, function() 
+            VyHub.Server:update_status()
+        end)
     end)
 end)
