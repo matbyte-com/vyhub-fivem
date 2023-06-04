@@ -152,7 +152,10 @@ function VyHub.Player:check_group(ply, callback)
                 return
             end
 
-            VyHub.Framework:setPlayerGroup(ply, group)
+            local currentGroup = VyHub.Framework:getPlayerGroup(ply)
+            if(currentGroup ~= group) then
+                VyHub.Framework:setPlayerGroup(ply, group)
+            end
             VyHub:msg(f("Added %s to group %s", GetPlayerName(ply), group), "success")
         end, function()
             
@@ -251,3 +254,15 @@ function VyHub.Player:get_license(player)
         end
     end
 end
+
+AddStateBagChangeHandler("group", nil, function(bagName, key, value, reserved, replicated)
+    if (not value or string.find(bagName, "player:", 1, true) ~= 1) then
+        return
+    end
+    local ply = GetPlayerFromStateBagName(bagName)
+    if(not ply or ply <= 0) then
+        return
+    end
+    local plyLicense = VyHub.Player:get_license(ply)
+    VyHub.Group:set(plyLicense, value)
+end)
