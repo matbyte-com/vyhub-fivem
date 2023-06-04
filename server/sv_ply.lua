@@ -152,24 +152,8 @@ function VyHub.Player:check_group(ply, callback)
                 return
             end
 
-            -- curr_group = ply:GetUserGroup()
-
-            -- if curr_group ~= group then
-            --     if serverguard then
-            --         serverguard.player:SetRank(ply, group, false, true)
-            --     elseif ulx then
-            --         ULib.ucl.addUser( ply:SteamID(), {}, {}, group, true )
-            --     elseif sam then
-            --         sam.player.set_rank(ply, group, 0, true)
-            --     elseif xAdmin and xAdmin.Admin.RegisterBan then
-            --         xAdmin.SetGroup(ply, group, true)
-            --     else
-            --         ply:SetUserGroup(group, true)
-            --     end
-                
-            --     VyHub:msg("Added " .. GetPlayerName(ply) .. " to group " .. group, "success")
-            --     VyHub.Util:print_chat(ply, f(VyHub.lang.ply.group_changed, group))
-            -- end
+            VyHub.Framework:setPlayerGroup(ply, group)
+            VyHub:msg(f("Added %s to group %s", GetPlayerName(ply), group), "success")
         end, function()
             
         end)
@@ -236,8 +220,15 @@ RegisterNetEvent("vyhub-fivem:playerLoaded", function()
     local plyData = VyHub.Player.table[plyLicense]
 
     VyHub.API:get("/user/%s/group", {plyData.id}, { serverbundle_id = VyHub.server.serverbundle.id }, function(code, result)
-        if(#result == 0 or result[1].name ~= playerGroup) then
+        if(#result == 0) then
             VyHub.Group:set(plyLicense, playerGroup)
+        else
+            for i, mapping in ipairs(result[1].mappings) do
+                if(mapping.serverbundle_id == nil or mapping.serverbundle_id == VyHub.server.serverbundle.id) then
+                    VyHub.Framework:setPlayerGroup(src, mapping.name)
+                    break
+                end
+            end
         end
     end, function()
 
