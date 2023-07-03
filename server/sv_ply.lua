@@ -255,6 +255,16 @@ function VyHub.Player:get_license(player)
     end
 end
 
+function VyHub.Player:get_source(license)
+    local players = GetPlayers()
+    for i, src in ipairs(players) do
+        local playerLicense = VyHub.Player:get_license(src)
+        if (playerLicense == license) then
+            return src
+        end
+    end
+end
+
 AddStateBagChangeHandler("group", nil, function(bagName, key, value, reserved, replicated)
     if (not value or string.find(bagName, "player:", 1, true) ~= 1) then
         return
