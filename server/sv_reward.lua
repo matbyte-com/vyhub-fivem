@@ -47,7 +47,7 @@ function VyHub.Reward:refresh(callback, limit_players, err)
     if user_ids == "" then
         VyHub.rewards = {}
     else
-        local query = f("%s&active=true&serverbundle_id=%s&status=OPEN&for_server_id=%s&foreign_ids=true", user_ids, VyHub.server.serverbundle.id, VyHub.server.id)
+        local query = f("%s&active=true&serverbundle_id=%s&status=OPEN&foreign_ids=true", user_ids, VyHub.server.serverbundle.id)
 
         VyHub.API:get('/packet/reward/applied/user' .. query, nil, nil, function(code, result)
             if limit_players == nil then
