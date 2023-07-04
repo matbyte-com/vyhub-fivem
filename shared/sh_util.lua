@@ -180,6 +180,19 @@ function VyHub.Util:timer_loop(delay, callback)
     end)
 end
 
+function table.HasValue(tbl, val)
+    for i, v in pairs(tbl) do
+        if (v == val) then
+            return true
+        end
+    end
+    return false
+end
+
+function string.Replace(originalString, findString, replaceString)
+    return originalString:gsub(findString, replaceString)
+end
+
 function VyHub.Util:dumpTable(table, nb)
     if nb == nil then
 		nb = 0
