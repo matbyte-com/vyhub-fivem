@@ -194,7 +194,7 @@ RegisterNetEvent("vyhub_ready", function()
         VyHub.Reward:exec_rewards(RewardEvent.DIRECT)
     end)
 
-    timer.Create("vyhub_reward_refresh", 60, 0, function()
+    VyHub.Util:timer_loop(60000, function()
         VyHub.Reward:refresh(function()
             VyHub.Reward:exec_rewards(RewardEvent.DIRECT)
         end)
