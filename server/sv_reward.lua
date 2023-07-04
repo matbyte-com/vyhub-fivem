@@ -149,7 +149,7 @@ function VyHub.Reward:exec_rewards(event, license)
                         VyHub:msg(f("No implementation for reward type %s", reward.type) "warning")
                     end
 
-                    VyHub:msg(f("Executed reward %s for user %s (%s): %s", reward.type, license, ply:SteamID64(), json.encode(data)))
+                    VyHub:msg(f("Executed reward %s for user %s: %s", reward.type, license, json.encode(data)))
 
                     if se and reward.once then
                         VyHub.Reward:set_executed(areward.id)
@@ -181,7 +181,7 @@ function VyHub.Reward:do_string_replacements(inp_str, license, areward)
     }
 
     for k, v in pairs(replacements) do
-        inp_str = string.Replace(tostring(inp_str), "%" .. tostring(k) .. "%", tostring(v))
+        inp_str = string.Replace(tostring(inp_str), "%%" .. tostring(k) .. "%%", tostring(v))
     end
 
     return inp_str
