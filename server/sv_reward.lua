@@ -142,8 +142,7 @@ function VyHub.Reward:exec_rewards(event, license)
 
                         if lua_str ~= nil then
                             lua_str = VyHub.Reward:do_string_replacements(lua_str, license, areward)
-
-                            -- TODO
+                            assert(load(f("local PLAYER = VyHub.Player:get_source('%s') %s", license, lua_str)))()
                         end
                     else
                         VyHub:msg(f("No implementation for reward type %s", reward.type) "warning")
