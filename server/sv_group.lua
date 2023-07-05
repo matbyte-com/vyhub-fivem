@@ -81,15 +81,15 @@ function VyHub.Group:set(license, groupname, seconds, processor_id, callback)
         }, function(code, result)
             VyHub:msg(f("Added membership in group %s for user %s.", groupname, license), "success")
 
-            local ply =  VyHub.Player.table[license]
-
-            --if IsValid(ply) then
+            VyHub.Player:get(license, function(ply)
+                -- if IsValid(ply) then
                 VyHub.Player:refresh(ply.src)
-            --end
+                -- end
 
-            if callback then
-                callback(true)
-            end
+                if callback then
+                    callback(true)
+                end
+            end)
         end, function(code, reason)
             VyHub:msg(f("Could not add membership in group %s for user %s.", groupname, license), "error")
             if callback then
