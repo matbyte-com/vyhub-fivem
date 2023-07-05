@@ -64,7 +64,7 @@ end
 function VyHub.Player:create(license, success, err)
     VyHub:msg(f("No existing user found for license %s. Creating..", license))
 
-    VyHub.API:post('/user/', nil, { identifier = license, type = 'FIVEM' }, function()
+    VyHub.API:post('/user/', nil, { identifier = license, username = GetPlayerName(VyHub.Player:get_source(license)), type = 'FIVEM' }, function()
         if success then
             success()
         end
@@ -166,7 +166,32 @@ end
 
 function VyHub.Player:refresh(ply, callback)
     VyHub.Player:check_group(ply)
+    VyHub.Player:check_username(ply)
 end
+
+function VyHub.Player:check_username(ply)
+    local license = self:get_license(ply)
+    
+    VyHub.Player:get(license, function(user)
+        if not user then
+            VyHub:msg(f("Could not check username for user %s, because no VyHub id is available.", license), "debug")
+            return
+        end
+        
+        local currentName = GetPlayerName(ply)
+        local oldName = user.username
+        if(not oldName or currentName ~= oldName) then 
+            VyHub.API:patch("/user/%s", {user.id}, {username = currentName}, function(code, result)
+                VyHub:msg(f("Patched username for user %s (%s -> %s)", result.id, oldName, currentName), "success")
+            end, function(code, result)
+                if(code ~= 404) then
+                    VyHub:msg(f("Could not patch username for user %s", result.id), "error")
+                end
+            end)
+        end
+    end)
+end
+
 
 function VyHub.Player:get_group(ply)
 --[[     if not IsValid(ply) then
