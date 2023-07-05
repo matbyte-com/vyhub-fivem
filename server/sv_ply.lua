@@ -93,7 +93,8 @@ function VyHub.Player:get(license, callback, retry)
     else
         VyHub.API:get("/user/%s", {license}, {type = "FIVEM"}, function(code, result)
             VyHub:msg(f("Received user %s for license %s.", result.id, license), "debug")
-    
+            
+            result.src = VyHub.Player:get_source(license)
             VyHub.Player.table[license] = result
 
             callback(result)
