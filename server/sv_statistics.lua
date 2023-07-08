@@ -54,9 +54,11 @@ function VyHub.Statistic:send_playtime()
                             serverbundle_id = VyHub.server.serverbundle.id,
                             value = tostring(hours)
                         }, function(code, result)
+                            VyHub.Statistic.playtime[userId] = nil
                             VyHub.Statistic:save_playtime()
                         end, function(code, reason)
                             if (code == 404) then
+                                VyHub.Statistic.playtime[userId] = nil
                                 VyHub.Statistic:save_playtime()
                             end
 
