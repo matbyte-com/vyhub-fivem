@@ -189,6 +189,28 @@ function table.HasValue(tbl, val)
     return false
 end
 
+function table.GetKeys(tbl)
+    local outputTable = {}
+    for i,v in pairs(tbl) do
+        table.insert(outputTable, i)
+    end
+    return outputTable
+end
+
+function table.Count(tbl)
+    local counter = 0
+    for i,v in pairs(tbl) do
+        counter = counter + 1
+    end
+    return counter
+end
+
+function math.Round(value, decimals)
+    decimals = decimals or 0
+    local factor = 10 ^ decimals
+    return math.floor(value * factor + 0.5) / factor
+end
+
 function string.Replace(originalString, findString, replaceString)
     return originalString:gsub(findString, replaceString)
 end
