@@ -3,5 +3,6 @@ Citizen.CreateThread(function()
         Citizen.Wait(100)
     end
 
+    TriggerEvent("vyhub-fivem:playerLoaded")
     TriggerServerEvent("vyhub-fivem:playerLoaded")
 end)
