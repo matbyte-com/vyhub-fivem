@@ -208,21 +208,21 @@ function VyHub.Player:get_group(ply)
 end
 
 function VyHub.Player:check_property(ply, property)
---     if not IsValid(ply) then return false end 
+    if not IsValid(ply) then return false end
 
     local group = VyHub.Player:get_group(ply)
 
-    if group ~= nil then
+    if (group) then
         local prop = group.properties[property]
 
-        if prop ~= nil and prop.granted then
+        if (prop and prop.granted) then
             return true 
         end
     end
 
-    if ply:GetNWBool("vyhub_admin", false) then
-        return true
-    end
+    if (VyHub.Player.table[ply]) then
+        return VyHub.Player.table[ply].admin
+    end 
 
     return false
 end
