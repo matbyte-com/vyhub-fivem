@@ -208,8 +208,6 @@ function VyHub.Player:get_group(ply)
 end
 
 function VyHub.Player:check_property(ply, property)
-    if not IsValid(ply) then return false end
-
     local group = VyHub.Player:get_group(ply)
 
     if (group) then
