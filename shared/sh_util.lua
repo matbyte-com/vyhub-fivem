@@ -205,6 +205,21 @@ function table.Count(tbl)
     return counter
 end
 
+function table.IsEmpty(tbl)
+    return (next(tbl) == nil)
+end
+
+function table.Merge(dest, src)
+    for k, v in pairs(src) do
+        if (type(v) == "table" and type(dest[k]) == "table") then
+            table.Merge(dest[k], v)
+        else
+            dest[k] = v
+        end
+    end
+    return dest
+end
+
 function math.Round(value, decimals)
     decimals = decimals or 0
     local factor = 10 ^ decimals
