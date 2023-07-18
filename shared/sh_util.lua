@@ -62,34 +62,15 @@ function VyHub.Util:replace_colors(message)
 	return message
 end
 
-function VyHub.Util:print_chat(ply, message, tag, color)
-	if SERVER then
-		if IsValid(ply) then
-			if not VyHub.Config.chat_tag then
-				VyHub.Config.chat_tag = "VyHub"
-			end
-
-			if not tag then
-				tag = [[Color(0, 187, 255), "[]] .. VyHub.Config.chat_tag .. [[] ", ]]
-			end
-
-			if not color then
-				color = [[255, 255, 255]]
-			end
-
-			message = string.Replace(message, '"', '')
-			message = string.Replace(message, '\r', '')
-			message = string.Replace(message, '\n', '')
-
-			message = VyHub.Util:replace_colors(message)
-
-			local tosend = [[chat.AddText(]] .. tag .. [[Color(]] .. color .. [[), "]] .. message .. [[" )]]
-
-			net.Start("vyhub_run_lua")
-				net.WriteString(tosend)
-			net.Send(ply)
-		end
-	end
+function VyHub.Util:print_chat(license, message, tag, color)
+    local targetSrc = VyHub.Player:get_source(license)
+    tag = (tag or "VyHub")
+    color = (color or {255, 0, 0})
+    TriggerClientEvent("chat:addMessage", targetSrc, {
+        color = color,
+        multiline = true,
+        args = {tag, message}
+    })
 end
 
 function VyHub.Util:print_chat_license(license, message, tag, color)
