@@ -63,8 +63,11 @@ end
 
 function VyHub.Player:create(license, success, err)
     VyHub:msg(f("No existing user found for license %s. Creating..", license))
-
-    VyHub.API:post('/user/', nil, { identifier = license, username = GetPlayerName(VyHub.Player:get_source(license)), type = 'FIVEM' }, function()
+    local plySrc = VyHub.Player:get_source(license)
+    if(not plySrc) then
+        return
+    end
+    VyHub.API:post('/user/', nil, { identifier = license, username = GetPlayerName(plySrc), type = 'FIVEM' }, function()
         if success then
             success()
         end
