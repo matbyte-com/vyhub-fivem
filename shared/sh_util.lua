@@ -116,11 +116,14 @@ end
 
 
 function VyHub.Util:print_chat_all(message, tag, color)
-	for _, ply in pairs(player.GetHumans()) do
-		VyHub.Util:print_chat(ply, message, tag, color)
-	end
+    tag = (tag or "VyHub")
+    color = (color or {255, 0, 0})
+    TriggerClientEvent("chat:addMessage", -1, {
+        color = color,
+        multiline = true,
+        args = {tag, message}
+    })
 end
-
 
 function VyHub.Util:get_player_by_nick(nick)
 	nick = string.lower(nick);
