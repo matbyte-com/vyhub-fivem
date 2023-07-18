@@ -193,22 +193,14 @@ function VyHub.Player:check_username(ply)
 end
 
 
-function VyHub.Player:get_group(ply)
---[[     if not IsValid(ply) then
-        return nil
-    end ]]
-
-    local group = VyHub.groups_mapped[ply:GetUserGroup()]
-
-    if group == nil then
-        return nil
-    end
-
-    return group
+function VyHub.Player:get_group(license)
+    local plySrc = VyHub.Player:get_source(license)
+    local playerGroup = VyHub.Framework:getPlayerGroup(plySrc)
+    return VyHub.groups_mapped[playerGroup]
 end
 
-function VyHub.Player:check_property(ply, property)
-    local group = VyHub.Player:get_group(ply)
+function VyHub.Player:check_property(license, property)
+    local group = VyHub.Player:get_group(license)
 
     if (group) then
         local prop = group.properties[property]
@@ -218,8 +210,8 @@ function VyHub.Player:check_property(ply, property)
         end
     end
 
-    if (VyHub.Player.table[ply]) then
-        return VyHub.Player.table[ply].admin
+    if (VyHub.Player.table[license]) then
+        return VyHub.Player.table[license].admin
     end 
 
     return false
