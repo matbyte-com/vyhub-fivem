@@ -132,9 +132,29 @@ function VyHub.Util:hex2rgb(hex)
 end
 
 function VyHub.Util:iso_ts_to_local_str(iso_ts)
-	local bias = VyHub.Config.time_offset ~= nil and -math.Round(VyHub.Config.time_offset * 60 * 60) or nil
-
-	return date(iso_ts):setbias(bias):tolocal():fmt(VyHub.Config.date_format)
+	-- Splitting the ISO timestamp into date and time components
+    local date, time = iso_ts:match('^(%d+-%d+-%d+)[T ](%d+:%d+:%d+)')
+    
+    -- Splitting the date into year, month, and day components
+    local year, month, day = date:match('^(%d+)-(%d+)-(%d+)$')
+    
+    -- Splitting the time into hour, minute, and second components
+    local hour, minute, second = time:match('^(%d+):(%d+):(%d+)$')
+    
+    -- Converting the ISO timestamp to a local date and time
+    local local_date_time = os.time({
+        year = tonumber(year),
+        month = tonumber(month),
+        day = tonumber(day),
+        hour = tonumber(hour),
+        min = tonumber(minute),
+        sec = tonumber(second)
+    })
+    
+    -- Formatting the local date and time as a string
+    local local_str = os.date("%Y-%m-%d %H:%M:%S", local_date_time)
+    
+    return local_str
 end
 
 
