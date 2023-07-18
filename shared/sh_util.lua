@@ -92,14 +92,17 @@ function VyHub.Util:print_chat(ply, message, tag, color)
 	end
 end
 
-function VyHub.Util:print_chat_steamid(steamid, message, tag, color)
-	if steamid ~= nil and steamid ~= false then
-		ply = player.GetBySteamID64(steamid)
-	
-		if IsValid(ply) then
-			VyHub.Util:print_chat(ply,  message, tag, color)
-		end
-	end
+function VyHub.Util:print_chat_license(license, message, tag, color)
+    local targetSrc = VyHub.Player:get_source(license)
+    if(targetSrc) then
+        tag = (tag or "VyHub")
+        color = (color or {255, 0, 0})
+        TriggerClientEvent("chat:addMessage", targetSrc, {
+            color = color,
+            multiline = true,
+            args = {tag, message}
+        })
+    end
 end
 
 function VyHub.Util:play_sound_steamid(steamid, url)
