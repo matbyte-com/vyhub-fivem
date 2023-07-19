@@ -34,17 +34,8 @@ end
 
 
 function VyHub.Util:concat_args(args, pos)
-	local toconcat = {}
-
-	if pos > 1 then
-		for i = pos, #args, 1 do
-			toconcat[#toconcat+1] = args[i]
-		end
-	end
-
-	return string.Implode(" ", toconcat)
+    return table.concat(args, " ", pos)
 end
-
 
 function VyHub.Util:replace_colors(message)
 	message = string.Replace(message, '"', '')
