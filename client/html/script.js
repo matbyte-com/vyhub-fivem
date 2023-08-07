@@ -40,7 +40,19 @@ $(function ()
             reload_current_user();
         }
     });
+
+    $(document).on("keyup", (event) =>
+    {
+        if (event.key === "Escape")
+            exit();
+    });
 });
+
+function exit()
+{
+    $.post(`https://${resourceName}/exit`);
+    $("body").fadeOut();
+}
 
 function init()
 {
