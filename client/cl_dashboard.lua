@@ -4,9 +4,8 @@ VyHub.Dashboard.ui = (VyHub.Dashboard.ui or nil)
 
 VyHub.Dashboard.html_ready = false
 
-
 RegisterNetEvent("vyhub_lang_loaded", function()
-    while(not VyHub.Dashboard.html_ready) do
+    while (not VyHub.Dashboard.html_ready) do
         Citizen.Wait(50)
     end
     local license = VyHub.Framework:getLicense()
@@ -20,6 +19,9 @@ RegisterNetEvent("vyhub_lang_loaded", function()
 end)
 RegisterNUICallback("ready", function()
     VyHub.Dashboard.html_ready = true
+end)
+RegisterNUICallback("exit", function()
+    SetNuiFocus(false, false)
 end)
 
 RegisterCommand("vh_dashboard", function(src, args)
@@ -62,19 +64,19 @@ function VyHub.Dashboard:load_perms(perms_json)
     })
 end
 
-RegisterNUICallback("warning_toggle", function(id)
-    ExecuteCommand(f("vh_warning_toggle %s", id))
+RegisterNUICallback("warning_toggle", function(data)
+    ExecuteCommand(f("vh_warning_toggle %s", data.id))
 end)
-RegisterNUICallback("warning_delete", function(id)
-    ExecuteCommand(f("vh_warning_delete %s", id))
+RegisterNUICallback("warning_delete", function(data)
+    ExecuteCommand(f("vh_warning_delete %s", data.id))
 end)
-RegisterNUICallback("ban_set_status", function(id, status)
+RegisterNUICallback("ban_set_status", function(data)
 
-    ExecuteCommand(f("ban_set_status %s %s", id, status))
+    ExecuteCommand(f("ban_set_status %s %s", data.id, data.status))
 end)
-RegisterNUICallback("warning_create", function(identifier, reason)
-    ExecuteCommand(f('vh_warn %s "%s"', identifier, VyHub.Util:escape_concommand_str(reason)))
+RegisterNUICallback("warning_create", function(data)
+    ExecuteCommand(f('vh_warn %s "%s"', data.identifier, VyHub.Util:escape_concommand_str(data.reason)))
 end)
-RegisterNUICallback("ban_create", function(identifier, minutes, reason)
-    ExecuteCommand(f('vh_ban %s "%s" "%s"', identifier, minutes, VyHub.Util:escape_concommand_str(reason)))
+RegisterNUICallback("ban_create", function(data)
+    ExecuteCommand(f('vh_ban %s "%s" "%s"', data.identifier, data.minutes, VyHub.Util:escape_concommand_str(data.reason)))
 end)
