@@ -5,3 +5,9 @@ function VyHub.Framework:isPlayerLoaded()
         return ESX ~= nil and ESX.IsPlayerLoaded()
     end
 end
+
+function VyHub.Framework:getLicense()
+    if (VyHub.Config.framework == "ESX") then
+        return ESX.PlayerData.identifier
+    end
+end
