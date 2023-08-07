@@ -1,0 +1,35 @@
+::selection {
+    background: #b5b5b5; /* WebKit/Blink Browsers */
+}
+
+body{
+    display: none;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    font-family: Roboto !important;
+}
+
+.vh-input {
+    background-color: #303030; 
+    color: white; 
+    height: 30px;
+}
+
+.nav-pills .active {
+    background-color: #303030;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+.user-tab {
+    padding: 3px 6px 3px 6px;
+    border-radius: 8px;
+    text-overflow: ellipsis;
+    overflow:hidden; 
+}
+
+#user_name {
+    width: 50%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

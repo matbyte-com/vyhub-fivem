@@ -5,10 +5,6 @@ author 'VyHub'
 description ''
 version '1.0.0'
 
-ui_page ''
-
-files {}
-
 shared_scripts {
     '@es_extended/imports.lua',
     'init.lua',
@@ -26,5 +22,8 @@ client_scripts {
     'client/*.lua',
     'client/modules/*.lua'
 }
+
+files {"/client/html/**"}
+ui_page "/client/html/index.html"
 
 
