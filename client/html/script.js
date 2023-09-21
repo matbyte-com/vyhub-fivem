@@ -9,7 +9,7 @@ let VyHub = {};
 
 $(function ()
 {
-    $.post(`https://${resourceName}/ready`);
+    send_loaded();
 
     window.addEventListener("message", (event) =>
     {
@@ -98,10 +98,10 @@ function init()
 
             <div class="row perm-warning_edit">
                 <div class="col-xs-10">
-                    <input id="user_warn" type="text" class="form-control vh-input" onclick="$('#user_warn').val('');" placeholder=" ${VyHub.lang.other.reason} " />
+                    <input style="height: 40px;" id="user_warn" type="text" class="form-control vh-input" placeholder=" ${VyHub.lang.other.reason} " />
                 </div>
                 <div class="col-xs-2" style="padding-left: 0;">
-                    <button style="height: 30px;" onclick="create_warning()" class="btn btn-warning btn-xs btn-block"><i class="fa fa-exclamation-triangle"></i> &nbsp; ${VyHub.lang.dashboard.action_warn}</button>
+                    <button style="height: 40px;" style="height: 30px;" onclick="create_warning()" class="btn btn-warning btn-xs btn-block"><i class="fa fa-exclamation-triangle"></i> &nbsp; ${VyHub.lang.dashboard.action_warn}</button>
                 </div>
             </div>
 
@@ -112,7 +112,7 @@ function init()
                     <th width="10px"></th>
                     <th> ${VyHub.lang.other.reason}</th>
                     <th>${VyHub.lang.other.admin}</th>
-                    <th>{VyHub.lang.other.date}</th>
+                    <th>${VyHub.lang.other.date}</th>
                     <th class="text-right"> ${VyHub.lang.other.actions}</th>
                 </tr>
 
@@ -132,13 +132,13 @@ function init()
 
             <div class="row perm-ban_edit">
                 <div class="col-xs-8">
-                    <input id="user_ban_reason" type="text" class="form-control vh-input" onclick="$('#user_ban_reason').val('');" placeholder="${VyHub.lang.other.reason}" />
+                    <input style="height: 40px;" id="user_ban_reason" type="text" class="form-control vh-input" placeholder="${VyHub.lang.other.reason}" />
                 </div >
                 <div class="col-xs-2" style="padding-left: 0;">
-                    <input id="user_ban_minutes" type="text" class="form-control vh-input" onclick="$('#user_ban_minutes').val('');" placeholder="${VyHub.lang.other.minutes}" />
+                    <input style="height: 40px;" id="user_ban_minutes" type="text" class="form-control vh-input" placeholder="${VyHub.lang.other.minutes}" />
                 </div>
                 <div class="col-xs-2" style="padding-left: 0;">
-                    <button style="height: 30px;" onclick="create_ban()" class="btn btn-danger btn-xs btn-block"><i class="fa fa-gavel"></i> &nbsp; ${VyHub.lang.dashboard.action_ban}</button>
+                    <button style="height: 40px;" onclick="create_ban()" class="btn btn-danger btn-xs btn-block"><i class="fa fa-gavel"></i> &nbsp; ${VyHub.lang.dashboard.action_ban}</button>
                 </div>
             </div >
 
@@ -169,6 +169,17 @@ function init()
 </div > `;
 
     $("body").append(html);
+    send_ready()
+}
+
+function send_loaded()
+{
+    $.post(`https://${resourceName}/loaded`);
+}
+
+function send_ready()
+{
+    $.post(`https://${resourceName}/ready`);
 }
 
 function escape(str)
@@ -277,6 +288,7 @@ function generate_user_list()
     }
 }
 
+
 function warning_toggle(id)
 {
     $.post(`https://${resourceName}/warning_toggle`, JSON.stringify({
@@ -382,10 +394,10 @@ function generate_user_overview(user_id)
 
         if (ban.status == "ACTIVE")
         {
-            actions += `<button class="btn btn-default btn-xs perm-ban_edit" onclick="ban_set_status(\'' + ban.id + '\', \'UNBANNED\')"><i class="fa fa-check"></i> &nbsp;${VyHub.lang.other.unban}</button>`;
+            actions += `<button class="btn btn-default btn-xs perm-ban_edit" onclick="ban_set_status('${ban.id}', 'UNBANNED')"><i class="fa fa-check"></i> &nbsp;${VyHub.lang.other.unban}</button>`;
         } else if (ban.status == "UNBANNED")
         {
-            actions += `<button class="btn btn-default btn-xs perm-ban_edit" onclick="ban_set_status(\'' + ban.id + '\', \'ACTIVE\')"><i class="fa fa-gavel"></i> &nbsp;${VyHub.lang.other.reban}</button>`;
+            actions += `<button class="btn btn-default btn-xs perm-ban_edit" onclick="ban_set_status('${ban.id}', 'ACTIVE')"><i class="fa fa-gavel"></i> &nbsp;${VyHub.lang.other.reban}</button>`;
         }
 
         $('#user_content_bans').append(' \

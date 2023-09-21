@@ -171,9 +171,27 @@ function VyHub.Reward:do_string_replacements(inp_str, license, areward)
 
     local playerSource = VyHub.Player:get_source(license)
 
+    local esx_name = '-'
+
+    if ESX then
+        local esx_player = ESX.GetPlayerFromId(playerSource)
+
+        if esx_player then
+            esx_name = esx_player.getName()
+        end
+    end
+
+    local steam_id = VyHub.Player:get_steamid(playerSource)
+
+    if not steam_id then
+        steam_id = '-'
+    end
+
     local replacements = {
-        ["user_server_id"] = playerSource,
-        ["user_steam_id"] = VyHub.Player:get_steamid(playerSource),
+        ["id"] = playerSource,
+        ["nick"] = GetPlayerName(playerSource),
+        ["esx_name"] = esx_name,
+        ["steam_id"] = steam_id,
         ["applied_packet_id"] = areward.applied_packet_id,
         ["packet_title"] = areward.applied_packet.packet.title,
         ["purchase_amount"] = purchase_amount
@@ -186,7 +204,7 @@ function VyHub.Reward:do_string_replacements(inp_str, license, areward)
     return inp_str
 end
 
-RegisterNetEvent("vyhub_ready", function()
+AddEventHandler("vyhub_ready", function()
     VyHub.Reward.executed_rewards_queue = VyHub.Cache:get("executed_rewards_queue") or {}
 
     VyHub.Reward:refresh(function()
@@ -199,16 +217,16 @@ RegisterNetEvent("vyhub_ready", function()
         end)
     end)
 
-    RegisterNetEvent("vyhub_ply_initialized", function(ply)
+    AddEventHandler("vyhub_ply_initialized", function(ply)
         local function exec_ply_rewards()
             VyHub.Reward:exec_rewards(RewardEvent.CONNECT, VyHub.Player:get_license(ply))
             TriggerEvent("vyhub_reward_post_connect", ply)
         end
 
-        VyHub.Reward:refresh(exec_ply_rewards, {ply}, exec_ply_rewards)
+        VyHub.Reward:refresh(exec_ply_rewards, {ply})
     end)
 
-    RegisterNetEvent("playerSpawned", function()
+    RegisterNetEvent("vyhub-fivem:playerSpawned", function()
         VyHub.Reward:exec_rewards(RewardEvent.SPAWN, VyHub.Player:get_license(source))
     end)
 

@@ -26,7 +26,7 @@ if (IsDuplicityVersion()) then
             if (encoded_custom ~= nil) then
                 local custom = json.decode(encoded_custom)
                 if (type(custom) == "table") then
-                    table.Merge(VyHub.lang, custom)
+                    for k,v in pairs(custom) do VyHub.lang[k] = v end
                     VyHub:msg(f("Loaded language %s.", VyHub.Config.lang))
                 else
                     VyHub:msg(f("Could not load language file %s.json!", VyHub.Config.lang), "warning")

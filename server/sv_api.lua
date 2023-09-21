@@ -18,7 +18,6 @@ function VyHub.API:request(method, url, path_params, query, headers, request_bod
         u = urllib.parse(url)
         u:setQuery(query)
         url = tostring(u:normalize())
-        print(url)
     end
 
     response_func = function(code, body, headers)

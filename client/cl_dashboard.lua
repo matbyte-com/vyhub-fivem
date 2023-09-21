@@ -2,10 +2,12 @@ VyHub.Dashboard = (VyHub.Dashboard or {})
 
 VyHub.Dashboard.ui = (VyHub.Dashboard.ui or nil)
 
+VyHub.Dashboard.html_loaded = false
 VyHub.Dashboard.html_ready = false
+VyHub.Dashboard.open = false
 
 RegisterNetEvent("vyhub_lang_loaded", function()
-    while (not VyHub.Dashboard.html_ready) do
+    while (not VyHub.Dashboard.html_loaded) do
         Citizen.Wait(50)
     end
     local license = VyHub.Framework:getLicense()
@@ -17,18 +19,21 @@ RegisterNetEvent("vyhub_lang_loaded", function()
         }
     })
 end)
+RegisterNUICallback("loaded", function()
+    VyHub.Dashboard.html_loaded = true
+end)
 RegisterNUICallback("ready", function()
     VyHub.Dashboard.html_ready = true
 end)
 RegisterNUICallback("exit", function()
     SetNuiFocus(false, false)
+    VyHub.Dashboard.open = false
 end)
 
 RegisterCommand("vh_dashboard", function(src, args)
     while (not VyHub.Dashboard.html_ready) do
         Citizen.Wait(50)
     end
-    TriggerServerEvent("vyhub_dashboard")
     SendNUIMessage({
         type = "toggleUI",
         data = {
@@ -36,14 +41,17 @@ RegisterCommand("vh_dashboard", function(src, args)
         }
     })
     SetNuiFocus(true, true)
+    VyHub.Dashboard.open = true
+    TriggerServerEvent("vyhub_dashboard")
 end)
 
 RegisterNetEvent("vyhub_dashboard", function(users, perms)
     while (not VyHub.Dashboard.html_ready) do
         Citizen.Wait(50)
     end
-    VyHub.Dashboard:load_users(users)
+    VyHub:msg(f("Received %s users and %s perms", #users, #perms))
     VyHub.Dashboard:load_perms(perms)
+    VyHub.Dashboard:load_users(users)
 end)
 
 function VyHub.Dashboard:load_users(users)
@@ -71,12 +79,19 @@ RegisterNUICallback("warning_delete", function(data)
     ExecuteCommand(f("vh_warning_delete %s", data.id))
 end)
 RegisterNUICallback("ban_set_status", function(data)
-
-    ExecuteCommand(f("ban_set_status %s %s", data.id, data.status))
+    ExecuteCommand(f("vh_ban_set_status %s %s", data.id, data.status))
 end)
 RegisterNUICallback("warning_create", function(data)
     ExecuteCommand(f('vh_warn %s "%s"', data.identifier, VyHub.Util:escape_concommand_str(data.reason)))
 end)
 RegisterNUICallback("ban_create", function(data)
     ExecuteCommand(f('vh_ban %s "%s" "%s"', data.identifier, data.minutes, VyHub.Util:escape_concommand_str(data.reason)))
+end)
+
+
+RegisterNetEvent("vyhub_dashboard_reload", function()
+    if VyHub.Dashboard.open then
+        TriggerServerEvent("vyhub_dashboard")
+        VyHub:msg("Reloading dashboard data, because server told us.")
+    end
 end)

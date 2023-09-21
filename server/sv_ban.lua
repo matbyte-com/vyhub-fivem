@@ -130,7 +130,6 @@ function VyHub.Ban:handle_queue()
                                             VyHub.Util:print_chat_all(msg)
 
                                             TriggerEvent("vyhub_dashboard_data_changed")
-                                            TriggerClientEvent("vyhub_dashboard_data_changed", -1)
                                         end, function(code, reason)
                                             if (code >= 400 and code < 500) then
                                                 local msg = reason
@@ -205,7 +204,6 @@ function VyHub.Ban:handle_queue()
                                 VyHub:msg(msg, "success")
                                 VyHub.Util:print_chat_license(creator_license, msg)
                                 TriggerEvent("vyhub_dashboard_data_changed")
-                                TriggerClientEvent("vyhub_dashboard_data_changed", -1)
                             end, function(code, reason)
                                 if (code >= 400 and code < 500) then
                                     VyHub.Ban.unban_queue[license] = nil
@@ -322,7 +320,8 @@ function VyHub.Ban:ban_set_status(ban_id, status, processor_license)
         }, function(code, result)
             VyHub:msg(f("%s set ban status of ban %s of user %s to %s.", processor.username, ban_id, result.user.username, status))
             VyHub.Util:print_chat_license(processor_license, f(VyHub.lang.ban.status_changed, result.user.username, status))
-            hook.Run("vyhub_dashboard_data_changed")
+            TriggerEvent("vyhub_dashboard_data_changed")
+            VyHub.Ban:refresh()
         end, function(code, err_reason, _, err_text)
             VyHub:msg(f("Error while settings status of ban %s: %s", ban_id, err_text), "error")
             VyHub.Util:print_chat_license(processor_license, f(VyHub.lang.other.error_api, err_text))
@@ -330,7 +329,7 @@ function VyHub.Ban:ban_set_status(ban_id, status, processor_license)
     end)
 end
 
-RegisterNetEvent("vyhub_ready", function()
+AddEventHandler("vyhub_ready", function()
     VyHub.Ban:refresh()
 
     VyHub.Ban.ban_queue = VyHub.Cache:get("ban_queue") or {}
@@ -350,7 +349,7 @@ RegisterNetEvent("vyhub_ready", function()
         local ip = GetPlayerEndpoint(src)
         deferrals.defer()
         Citizen.Wait(0)
-        deferrals.update(f("Hello %s! Checking if your banned..", name))
+        deferrals.update(f("Hello %s! Checking if you are banned..", name))
         Citizen.Wait(0)
 
         if (VyHub.Ban:check_player_banned(license)) then
@@ -371,8 +370,8 @@ RegisterNetEvent("vyhub_ready", function()
     end)
 end)
 
-RegisterNetEvent("vyhub_ready", function()
-    RegisterNetEvent("vyhub_bans_refreshed", function()
+AddEventHandler("vyhub_ready", function()
+    AddEventHandler("vyhub_bans_refreshed", function()
         VyHub.Ban:kick_banned_players()
     end)
 

@@ -1,4 +1,5 @@
 VyHub.Util = VyHub.Util or {}
+VyHub.Util.cancelled_timers = VyHub.Util.cancelled_timers or {}
 
 
 function VyHub.Util:format_datetime(unix_timestamp)
@@ -75,18 +76,6 @@ function VyHub.Util:print_chat_license(license, message, tag, color)
             args = {tag, message}
         })
     end
-end
-
-function VyHub.Util:play_sound_steamid(steamid, url)
-	if steamid ~= nil and steamid ~= false then
-		ply = player.GetBySteamID64(steamid)
-	
-		if IsValid(ply) then
-			net.Start("vyhub_run_lua")
-				net.WriteString([[sound.PlayURL ( "]] .. url .. [[", "", function() end)]])
-			net.Send(ply)
-		end
-	end
 end
 
 
@@ -169,12 +158,32 @@ function VyHub.Util:endsWith(str, ending)
 	return string.find(str, ending, #str - #ending + 1, true) ~= nil
 end
 
-function VyHub.Util:timer_loop(delay, callback)
+function VyHub.Util:timer_loop(delay, callback, name)
+    if name then
+        VyHub.Util.cancelled_timers[name] = nil
+    end
+
     Citizen.CreateThread(function()
         while(true) do
             Citizen.Wait(delay)
+
+            if name and VyHub.Util.cancelled_timers[name] then
+                break
+            end
+
             callback()
         end
+    end)
+end
+
+function VyHub.Util:cancel_timer(name)
+    VyHub.Util.cancelled_timers[name] = true
+end
+
+function VyHub.Util:timer_simple(delay, callback)
+    Citizen.CreateThread(function()
+        Citizen.Wait(delay)
+        callback()
     end)
 end
 

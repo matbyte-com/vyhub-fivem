@@ -44,15 +44,12 @@ end
 RegisterNetEvent("vyhub_dashboard", function()
     local src = source
     local license = VyHub.Player:get_license(src)
-    print(license)
     VyHub.Dashboard:get_data(license, function(users)
-        print(ESX.DumpTable(users))
         local perms = VyHub.Dashboard:get_permissions(license)
-        print(ESX.DumpTable(perms))
         TriggerClientEvent("vyhub_dashboard", src, users, perms)
     end)
 end)
 
-RegisterNetEvent("vyhub_dashboard_data_changed", function()
+AddEventHandler("vyhub_dashboard_data_changed", function()
     VyHub.Dashboard:reset()
 end)

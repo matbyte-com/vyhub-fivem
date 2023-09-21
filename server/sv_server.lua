@@ -67,7 +67,6 @@ function VyHub:server_data_ready()
     TriggerEvent("vyhub_ready")
 end
 
-RegisterNetEvent("vyhub_api_ready")
 AddEventHandler("vyhub_api_ready", function()
     VyHub.API:get("/server/%s", { VyHub.Config.server_id }, nil, function(code, result) 
         VyHub.server = result

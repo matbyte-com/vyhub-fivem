@@ -5,7 +5,7 @@ function VyHub.Warning:create(license, reason, processor_license)
 
     VyHub.Player:get(license, function(user)
         if (user == nil) then
-            VyHub.Util:print_chat_license(processor_license, f("Cannot find VyHub user with SteamID %s.", license))
+            VyHub.Util:print_chat_license(processor_license, f("Cannot find VyHub user with license %s.", license))
             return
         end
 
@@ -29,9 +29,7 @@ function VyHub.Warning:create(license, reason, processor_license)
                 VyHub:msg(f("Added warning for player %s: %s", user.username, reason))
                 VyHub.Util:print_chat_all(f(VyHub.lang.warning.user_warned, user.username, processor.username, reason))
                 VyHub.Util:print_chat_license(license, f(VyHub.lang.warning.received, processor.username, reason))
-                VyHub.Util:play_sound_license(license, "https://cdn.vyhub.net/sound/negativebeep.wav")
                 TriggerEvent("vyhub_dashboard_data_changed")
-                TriggerClientEvent("vyhub_dashboard_data_changed", -1)
             end, function(code, err_reason, _, err_text)
                 VyHub:msg(f("Error while adding warning for player %s: %s", user.username, err_text), "error")
                 VyHub.Util:print_chat_license(processor_license, f(VyHub.lang.warning.create_error, user.username, err_text))
@@ -58,7 +56,7 @@ function VyHub.Warning:delete(warning_id, processor_license)
             VyHub:msg(f("%s deleted warning %s.", processor.username, warning_id))
             VyHub.Util:print_chat_license(processor_license, f(VyHub.lang.warning.deleted))
             -- VyHub.Util:print_chat_license(steamid, VyHub.lang.warning.deleted_self)
-            hook.Run("vyhub_dashboard_data_changed")
+            TriggerEvent("vyhub_dashboard_data_changed")
         end, function(code, err_reason, _, err_text)
             VyHub:msg(f("Error while deleteing warning %s: %s", warning_id, err_text), "error")
             VyHub.Util:print_chat_license(processor_license, f(VyHub.lang.other.error_api, err_text))
@@ -85,7 +83,6 @@ function VyHub.Warning:toggle(warning_id, processor_license)
             VyHub.Util:print_chat_license(processor_license, f(VyHub.lang.warning.toggled))
             -- VyHub.Util:print_chat_license(steamid, VyHub.lang.warning.toggled_self)
             TriggerEvent("vyhub_dashboard_data_changed")
-            TriggerClientEvent("vyhub_dashboard_data_changed", -1)
         end, function(code, err_reason, _, err_text)
             VyHub:msg(f("Error while toggling status of warning %s: %s", warning_id, err_text), "error")
             VyHub.Util:print_chat_license(processor_license, f(VyHub.lang.other.error_api, err_text))
@@ -114,7 +111,7 @@ function warn_command(license, args)
     return false
 end
 
-RegisterNetEvent("vyhub_ready", function()
+AddEventHandler("vyhub_ready", function()
 
     RegisterCommand("vh_warn", function(src, args)
         if (not args[1] or not args[2]) then

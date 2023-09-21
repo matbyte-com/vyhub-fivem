@@ -4,9 +4,10 @@ VyHub.Config = VyHub.Config or {}
 f = string.format
 
 function VyHub:msg(message, type)
-    type = type or "neutral"
+    type = type or "info"
+
+    if type == "debug" and not VyHub.Config.debug then return end
  
     print(f("[%s] ", type), message)
 end
 
-VyHub:msg("1", "error")

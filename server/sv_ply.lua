@@ -16,29 +16,27 @@ function VyHub.Player:initialize(ply, retry)
         result.src = ply
         VyHub.Player.table[license] = result
 
-        VyHub.Player:refresh(ply)
+        VyHub.Player:refresh(ply, _, true)
 
         TriggerEvent("vyhub_ply_initialized", ply)
 
-        -- local ply_timer_name = "vyhub_player_" .. license
+        local ply_timer_name = "vyhub_player_" .. license
 
-        -- VyHub.Util:timer_loop(60000, function() 
-            
-        -- end)
-        -- timer.Create(ply_timer_name, VyHub.Config.player_refresh_time, 0, function()
-        --     if IsValid(ply) then
-        --         VyHub.Player:refresh(ply)
-        --     else
-        --         timer.Remove(ply_timer_name)
-        --     end
-        -- end)
+        VyHub.Util:timer_loop(60000, function() 
+            if !GetPlayerPing(ply) then
+                VyHub.Util:cancel_timer(ply_timer_name)
+                return
+            end
+
+            VyHub.Player:refresh(ply)
+        end)
     end, function(code, reason)
         if code ~= 404 then
             VyHub:msg(f("Could not check if users %s exists. Retrying in a minute..", license), "error")
 
-            --VyHub.Util:timer_loop(60000, function() 
-            --    VyHub.Player:initialize(ply)
-            --end)
+            VyHub.Util:timer_simple(60000, function() 
+                VyHub.Player:initialize(ply)
+            end)
 
             return
         end
@@ -46,9 +44,9 @@ function VyHub.Player:initialize(ply, retry)
         if retry then
             VyHub:msg(f("Could not create user %s. Retrying in a minute..", license), "error")
 
-            --VyHub.Util:timer_loop(60000, function() 
-            --    VyHub.Player:initialize(ply)
-            --end)
+            VyHub.Util:timer_simple(60000, function() 
+                VyHub.Player:initialize(ply)
+            end)
 
             return
         end
@@ -159,16 +157,18 @@ function VyHub.Player:check_group(ply, callback)
             local currentGroup = VyHub.Framework:getPlayerGroup(ply)
             if(currentGroup ~= group) then
                 VyHub.Framework:setPlayerGroup(ply, group)
+                VyHub:msg(f("Added %s to group %s (was %s before)", GetPlayerName(ply), group, currentGroup), "success")
             end
-            VyHub:msg(f("Added %s to group %s", GetPlayerName(ply), group), "success")
         end, function()
             
         end)
     end)
 end
 
-function VyHub.Player:refresh(ply, callback)
-    VyHub.Player:check_group(ply)
+function VyHub.Player:refresh(ply, callback, ignore_group)
+    if ignore_group then
+        VyHub.Player:check_group(ply)
+    end
     VyHub.Player:check_username(ply)
 end
 
@@ -220,16 +220,12 @@ function VyHub.Player:check_property(license, property)
     return false
 end
 
-AddEventHandler('playerConnecting', function(name, setCallback, deferrals)
-    VyHub:msg("ply conn")
-    local source = source -- PlayerID
-    
+AddEventHandler('playerConnecting', function(name, setCallback, deferrals)    local source = source -- PlayerID
     deferrals.defer()
     Wait(0)
     deferrals.update("[VyHub] Checking Userdata")
 
-    VyHub:msg("ply conn2: " .. source)
-
+    VyHub:msg("playerConnecting")
     VyHub.Player:initialize(source)
 
     deferrals.done()
@@ -238,33 +234,11 @@ end)
 RegisterNetEvent("vyhub-fivem:playerLoaded", function()
     local src = source
     local plyLicense = VyHub.Player:get_license(src)
-    local playerGroup = VyHub.Framework:getPlayerGroup(src)
-    local plyData = VyHub.Player.table[plyLicense]
 
-    VyHub.API:get("/user/%s/group", {plyData.id}, { serverbundle_id = VyHub.server.serverbundle.id }, function(code, result)
-        if(#result == 0) then
-            VyHub.Group:set(plyLicense, playerGroup)
-        else
-            for i, mapping in ipairs(result[1].mappings) do
-                if(mapping.serverbundle_id == nil or mapping.serverbundle_id == VyHub.server.serverbundle.id) then
-                    VyHub.Framework:setPlayerGroup(src, mapping.name)
-                    break
-                end
-            end
-        end
-    end, function()
+    VyHub:msg("playerLoaded")
 
-    end)
+    VyHub.Player:refresh(plyLicense, callback)
 end)
-
-function VyHub.Player:get_steamid(player)
-    VyHub:msg(json.encode(GetPlayerIdentifiers(player)))
-	for k,v in pairs(GetPlayerIdentifiers(player))do
-        if string.sub(v, 1, string.len("steam:")) == "steam:" then
-        	return tonumber(v:gsub("steam:", ""), 16)
-        end
-	end
-end
 
 function VyHub.Player:get_license(player)
     for k, v in pairs(GetPlayerIdentifiers(player)) do
@@ -284,6 +258,14 @@ function VyHub.Player:get_source(license)
     end
 end
 
+function VyHub.Player:get_steamid(player)
+	for k,v in pairs(GetPlayerIdentifiers(player))do
+        if string.sub(v, 1, string.len("steam:")) == "steam:" then
+        	return tonumber(v:gsub("steam:", ""), 16)
+        end
+	end
+end
+
 AddStateBagChangeHandler("group", nil, function(bagName, key, value, reserved, replicated)
     if (not value or string.find(bagName, "player:", 1, true) ~= 1) then
         return
@@ -293,5 +275,7 @@ AddStateBagChangeHandler("group", nil, function(bagName, key, value, reserved, r
         return
     end
     local plyLicense = VyHub.Player:get_license(ply)
+    local currentGroup = VyHub.Framework:getPlayerGroup(ply)
+    VyHub:msg(f("Detected group change of player %s to group %s (from %s)", plyLicense, value, currentGroup))
     VyHub.Group:set(plyLicense, value)
 end)
