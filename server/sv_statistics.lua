@@ -111,7 +111,7 @@ function VyHub.Statistic:get_or_create_attr_definition(callback)
     end)
 end
 
-AddEventHandler("vyhub_api_ready", function()
+AddEventHandler("vyhub_ready", function()
     VyHub.Statistic.playtime = VyHub.Cache:get("playtime") or {}
 
     VyHub.Statistic:send_playtime()

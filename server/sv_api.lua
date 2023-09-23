@@ -98,7 +98,7 @@ AddEventHandler("vyhub_loading_finish", function()
             "API URL, Server ID or API Key not set! Please follow the manual.",
             "error")
 
-        SetTimeout(60000, function()
+        Citizen.SetTimeout(60000, function()
             TriggerEvent("vyhub_loading_finish")
         end)
 
@@ -128,5 +128,3 @@ AddEventHandler("vyhub_loading_finish", function()
         TriggerEvent("vyhub_api_failed")
     end)
 end)
-
-TriggerEvent("vyhub_loading_finish")

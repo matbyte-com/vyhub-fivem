@@ -15,7 +15,6 @@ end
 function VyHub.Framework:getPlayerGroup(src)
     local xPlayer = VyHub.Framework:getPlayerFromId(src)
     if(not xPlayer) then
-        VyHub:msg(f("Could not find framework player for source %s", src), "warning")
         return
     end
     if (VyHub.Config.framework == "ESX") then
@@ -28,6 +27,9 @@ function VyHub.Framework:setPlayerGroup(src, group)
     if(not xPlayer) then
         return
     end
+
+    VyHub.Group.group_changes[src] = group
+
     if (VyHub.Config.framework == "ESX") then
         xPlayer.setGroup(group)
     end

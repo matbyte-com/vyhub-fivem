@@ -7,7 +7,7 @@ function VyHub.Cache:save(key, value)
         data = value
     }
 
-    local filename = string.format("%s/%s.json", resourcePath, key)
+    local filename = string.format("%s/data/%s.json", resourcePath, key)
     local json = json.encode(data)
 
     VyHub:msg("Write " .. filename .. ": " .. json, "debug")
@@ -22,7 +22,7 @@ function VyHub.Cache:save(key, value)
 end
 
 function VyHub.Cache:get(key, max_age)
-    local data_str = LoadResourceFile(GetCurrentResourceName(), f("%s.json", key))
+    local data_str = LoadResourceFile(GetCurrentResourceName(), f("data/%s.json", key))
 
     if (not data_str) then
         return nil

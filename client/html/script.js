@@ -80,7 +80,7 @@ function init()
                             <span class="label label-default" style="background-color: #5E0000; border-radius: .25em 0 0 .25em;">
                                 <i class="fa fa-user"></i> &nbsp;<span id="user_content_name"></span>
                             </span>
-                            <span class="label label-default" style="border-radius: 0 .25em .25em 0;">
+                            <span class="label label-default" style="border-radius: 0 .25em .25em 0;" id="username_label">
                                 <span id="user_content_username"></span>
                             </span>
                         </span>
@@ -166,9 +166,9 @@ function init()
             </div>
         </div >
     </div >
-</div > `;
+</div> `;
 
-    $("body").append(html);
+    $("container").append(html);
     send_ready()
 }
 
@@ -331,10 +331,10 @@ function generate_user_overview(user_id)
 
     if (activity.extra.Nickname === user.username)
     {
-        $('#user_content_username').hide();
+        $('#username_label').hide();
     } else
     {
-        $('#user_content_username').show();
+        $('#username_label').show();
     }
 
     $('.user-tab').removeClass("active");

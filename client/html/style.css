@@ -2,13 +2,28 @@
     background: #b5b5b5; /* WebKit/Blink Browsers */
 }
 
-body{
+
+body {
+    background-color: transparent !important;
+}
+
+container::-webkit-scrollbar {
     display: none;
+}
+
+container{
+    border-radius: 5px;
+    position: absolute;
+    top: 15%;
+    left: 15%;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
+    scrollbar-width: none; 
     font-family: Roboto !important;
-    width: 80%;
-    height: 80%;
+    background-color: #222222 !important;
+    width: 70%;
+    height: 70%;
+    opacity: 0.8;
 }
 
 .vh-input {

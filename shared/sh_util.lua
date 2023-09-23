@@ -39,53 +39,43 @@ function VyHub.Util:concat_args(args, pos)
 end
 
 function VyHub.Util:replace_colors(message)
-	message = string.Replace(message, '"', '')
-	message = string.Replace(message, '<red>', '", Color(255, 24, 35), "')
-	message = string.Replace(message, '</red>', '", Color(255, 255, 255), "')
-	message = string.Replace(message, '<green>', '", Color(45, 170, 0), "')
-	message = string.Replace(message, '</green>', '", Color(255, 255, 255), "')
-	message = string.Replace(message, '<blue>', '", Color(0, 115, 204), "')
-	message = string.Replace(message, '</blue>', '", Color(255, 255, 255), "')
-	message = string.Replace(message, '<yellow>', '", Color(229, 221, 0), "')
-	message = string.Replace(message, '</yellow>', '", Color(255, 255, 255), "')
-	message = string.Replace(message, '<pink>', '", Color(229, 0, 218), "')
-	message = string.Replace(message, '</pink>', '", Color(255, 255, 255), "')
+	message = string.Replace(message, '<red>', '~r~')
+	message = string.Replace(message, '</red>', '~w~')
+	message = string.Replace(message, '<green>', '~g~')
+	message = string.Replace(message, '</green>', '~w~')
+	message = string.Replace(message, '<blue>', '~b~')
+	message = string.Replace(message, '</blue>', '~w~')
+	message = string.Replace(message, '<yellow>', '~y~')
+	message = string.Replace(message, '</yellow>', '~w~')
+	message = string.Replace(message, '<pink>', '~q~')
+	message = string.Replace(message, '</pink>', '~w~')
+    message = string.Replace(message, '<orange>', '~o~')
+	message = string.Replace(message, '</orange>', '~w~')
 
 	return message
-end
-
-function VyHub.Util:print_chat(license, message, tag, color)
-    local targetSrc = VyHub.Player:get_source(license)
-    tag = (tag or "VyHub")
-    color = (color or {255, 0, 0})
-    TriggerClientEvent("chat:addMessage", targetSrc, {
-        color = color,
-        multiline = true,
-        args = {tag, message}
-    })
 end
 
 function VyHub.Util:print_chat_license(license, message, tag, color)
     local targetSrc = VyHub.Player:get_source(license)
     if(targetSrc) then
-        tag = (tag or "VyHub")
+        tag = (tag or "[VyHub]")
         color = (color or {255, 0, 0})
         TriggerClientEvent("chat:addMessage", targetSrc, {
             color = color,
             multiline = true,
-            args = {tag, message}
+            args = {tag, VyHub.Util:replace_colors(message)}
         })
     end
 end
 
 
 function VyHub.Util:print_chat_all(message, tag, color)
-    tag = (tag or "VyHub")
+    tag = (tag or "[VyHub]")
     color = (color or {255, 0, 0})
     TriggerClientEvent("chat:addMessage", -1, {
         color = color,
         multiline = true,
-        args = {tag, message}
+        args = {tag, VyHub.Util:replace_colors(message)}
     })
 end
 
@@ -103,11 +93,11 @@ end
 function VyHub.Util:hex2rgb(hex)
     hex = hex:gsub("#","")
     if(string.len(hex) == 3) then
-        return Color(tonumber("0x"..hex:sub(1,1)) * 17, tonumber("0x"..hex:sub(2,2)) * 17, tonumber("0x"..hex:sub(3,3)) * 17)
+        return {tonumber("0x"..hex:sub(1,1)) * 17, tonumber("0x"..hex:sub(2,2)) * 17, tonumber("0x"..hex:sub(3,3)) * 17}
     elseif(string.len(hex) == 6) then
-        return Color(tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6)))
+        return {tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))}
     else
-    	return Color(255,255,255)
+    	return {255,255,255}
     end
 end
 
@@ -178,13 +168,6 @@ end
 
 function VyHub.Util:cancel_timer(name)
     VyHub.Util.cancelled_timers[name] = true
-end
-
-function VyHub.Util:timer_simple(delay, callback)
-    Citizen.CreateThread(function()
-        Citizen.Wait(delay)
-        callback()
-    end)
 end
 
 function table.HasValue(tbl, val)
@@ -265,4 +248,15 @@ function VyHub.Util:dumpTable(table, nb)
 	else
 		return tostring(table)
 	end
+end
+
+function VyHub.Util:string_split(inputstr, sep)
+    if sep == nil then
+        sep = "%s"
+    end
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+    end
+    return t
 end

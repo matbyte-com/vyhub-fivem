@@ -1,4 +1,4 @@
-RegisterCommand("login", function(src, args)
+RegisterCommand("vylogin", function(src, args)
     local uuid = args[1]
     if (not uuid) then
         return
@@ -23,3 +23,4 @@ RegisterCommand("login", function(src, args)
         end)
     end)
 end)
+

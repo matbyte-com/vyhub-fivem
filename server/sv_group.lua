@@ -24,9 +24,6 @@ function VyHub.Group:refresh()
         end
     end, function(code, reason)
         VyHub:msg("Could not refresh groups. Retrying in a minute.", "error")
-        timer.Simple(60, function()
-            VyHub.Group:refresh()
-        end)
     end)
 end
 
@@ -135,3 +132,32 @@ end
         end)
     end)
 end ]]
+
+AddStateBagChangeHandler("group", nil, function(bagName, key, value, reserved, replicated)
+    if (not value or string.find(bagName, "player:", 1, true) ~= 1) then
+        return
+    end
+    local ply = GetPlayerFromStateBagName(bagName)
+    if(not ply or ply <= 0) then
+        return
+    end
+    local plyLicense = VyHub.Player:get_license(ply)
+    local currentGroup = VyHub.Framework:getPlayerGroup(ply)
+    
+    if VyHub.Group.group_changes[ply] == value then
+        return
+    end
+
+    if not currentGroup then return end
+
+    VyHub:msg(f("Detected group change of player %s to group %s (from %s)", plyLicense, value, currentGroup))
+    VyHub.Group:set(plyLicense, value)
+end)
+
+
+
+AddEventHandler("vyhub_ready", function()
+    VyHub.Util:timer_loop(60000*5, function()
+        VyHub.Group:refresh()
+    end)
+end)

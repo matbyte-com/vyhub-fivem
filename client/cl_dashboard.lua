@@ -6,6 +6,28 @@ VyHub.Dashboard.html_loaded = false
 VyHub.Dashboard.html_ready = false
 VyHub.Dashboard.open = false
 
+local function open_dashboard()
+    while (not VyHub.Dashboard.html_ready) do
+        Citizen.Wait(50)
+    end
+    SendNUIMessage({
+        type = "toggleUI",
+        data = {
+            toggle = true
+        }
+    })
+    SetNuiFocus(true, true)
+    TriggerScreenblurFadeIn(500)
+    VyHub.Dashboard.open = true
+    TriggerServerEvent("vyhub_dashboard")
+end
+
+local function close_dashboard()
+    TriggerScreenblurFadeOut(500)
+    SetNuiFocus(false, false)
+    VyHub.Dashboard.open = false
+end
+
 RegisterNetEvent("vyhub_lang_loaded", function()
     while (not VyHub.Dashboard.html_loaded) do
         Citizen.Wait(50)
@@ -26,23 +48,11 @@ RegisterNUICallback("ready", function()
     VyHub.Dashboard.html_ready = true
 end)
 RegisterNUICallback("exit", function()
-    SetNuiFocus(false, false)
-    VyHub.Dashboard.open = false
+    close_dashboard()
 end)
 
-RegisterCommand("vh_dashboard", function(src, args)
-    while (not VyHub.Dashboard.html_ready) do
-        Citizen.Wait(50)
-    end
-    SendNUIMessage({
-        type = "toggleUI",
-        data = {
-            toggle = true
-        }
-    })
-    SetNuiFocus(true, true)
-    VyHub.Dashboard.open = true
-    TriggerServerEvent("vyhub_dashboard")
+RegisterCommand(VyHub.Config.dashboard_command, function(src, args)
+    open_dashboard()
 end)
 
 RegisterNetEvent("vyhub_dashboard", function(users, perms)

@@ -387,7 +387,7 @@ AddEventHandler("vyhub_ready", function()
             if (VyHub.Player:check_property(license, "ban_edit")) then
                 VyHub.Ban:create(args[1], args[2], args[3], license)
             else
-                VyHub.Util:print_chat(license, VyHub.lang.ply.no_permissions)
+                VyHub.Util:print_chat_license(license, VyHub.lang.ply.no_permissions)
             end
         end
     end)
@@ -404,7 +404,7 @@ AddEventHandler("vyhub_ready", function()
             if (VyHub.Player:check_property(license, "ban_edit")) then
                 VyHub.Ban:unban(args[1], license)
             else
-                VyHub.Util:print_chat(license, VyHub.lang.ply.no_permissions)
+                VyHub.Util:print_chat_license(license, VyHub.lang.ply.no_permissions)
             end
         end
     end)
@@ -425,7 +425,7 @@ AddEventHandler("vyhub_ready", function()
             if VyHub.Player:check_property(license, "ban_edit") then
                 VyHub.Ban:ban_set_status(args[1], args[2], license)
             else
-                VyHub.Util:print_chat(license, VyHub.lang.ply.no_permissions)
+                VyHub.Util:print_chat_license(license, VyHub.lang.ply.no_permissions)
             end
         end
     end)

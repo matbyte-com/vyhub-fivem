@@ -92,7 +92,7 @@ end
 
 function warn_command(license, args)
     if (not VyHub.Player:check_property(license, "warning_edit")) then
-        VyHub.Util:print_chat(license, VyHub.lang.ply.no_permissions)
+        VyHub.Util:print_chat_license(license, VyHub.lang.ply.no_permissions)
         return
     end
 
@@ -106,7 +106,7 @@ function warn_command(license, args)
         end
     end
 
-    VyHub.Util:print_chat(license, VyHub.lang.warning.cmd_help)
+    VyHub.Util:print_chat_license(license, VyHub.lang.warning.cmd_help)
 
     return false
 end
@@ -125,7 +125,7 @@ AddEventHandler("vyhub_ready", function()
             if VyHub.Player:check_property(license, "warning_edit") then
                 VyHub.Warning:create(args[1], args[2], license)
             else
-                VyHub.Util:print_chat(license, VyHub.lang.ply.no_permissions)
+                VyHub.Util:print_chat_license(license, VyHub.lang.ply.no_permissions)
             end
         end
     end)
@@ -144,7 +144,7 @@ AddEventHandler("vyhub_ready", function()
             if (VyHub.Player:check_property(license, "warning_edit")) then
                 VyHub.Warning:toggle(warning_id, license)
             else
-                VyHub.Util:print_chat(license, VyHub.lang.ply.no_permissions)
+                VyHub.Util:print_chat_license(license, VyHub.lang.ply.no_permissions)
             end
         end
     end)
@@ -163,7 +163,7 @@ AddEventHandler("vyhub_ready", function()
             if (VyHub.Player:check_property(license, "warning_delete")) then
                 VyHub.Warning:delete(warning_id, license)
             else
-                VyHub.Util:print_chat(license, VyHub.lang.ply.no_permissions)
+                VyHub.Util:print_chat_license(license, VyHub.lang.ply.no_permissions)
             end
         end
     end)

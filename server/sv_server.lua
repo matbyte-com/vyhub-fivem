@@ -26,11 +26,16 @@ function VyHub.Server:update_status()
             local nickname = GetPlayerName(src)
             local coords = GetEntityCoords(GetPlayerPed(src))
             local ping = GetPlayerPing(src)
+            local xPlayer = VyHub.Framework:getPlayerFromId(src)
+
+            if xPlayer then
+                nickname = xPlayer.getName()
+            end
+
             table.insert(user_activities, {
                 user_id = plyData.id,
                 extra = {
                     Nickname = nickname,
-                    License = license,
                     Coords = f("%.2f, %.2f, %.2f", coords.x, coords.y, coords.z),
                     Ping = f("%i ms", ping)
                 }
@@ -39,7 +44,7 @@ function VyHub.Server:update_status()
     end
 
     local data = {
-        users_max = VyHub.Config.max_players,
+        users_max = GetConvar("sv_maxclients"),
         users_current = GetNumPlayerIndices(),
         is_alive = true,
         user_activities = user_activities
