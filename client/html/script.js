@@ -24,7 +24,7 @@ $(function ()
         }
         else if (type === "toggleUI")
         {
-            (data.toggle ? $("body").fadeIn() : $("body").fadeOut());
+            (data.shown ? $("body").fadeIn() : $("body").fadeOut());
         }
         else if (type === "load_license")
         {

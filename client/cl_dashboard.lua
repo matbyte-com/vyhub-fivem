@@ -13,7 +13,7 @@ local function open_dashboard()
     SendNUIMessage({
         type = "toggleUI",
         data = {
-            toggle = true
+            shown = true
         }
     })
     SetNuiFocus(true, true)
@@ -23,6 +23,12 @@ local function open_dashboard()
 end
 
 local function close_dashboard()
+    SendNUIMessage({
+        type = "toggleUI",
+        data = {
+            shown = false
+        }
+    })
     TriggerScreenblurFadeOut(500)
     SetNuiFocus(false, false)
     VyHub.Dashboard.open = false

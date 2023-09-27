@@ -9,7 +9,6 @@ function VyHub.Statistic:save_playtime()
 end
 
 function VyHub.Statistic:add_one_minute()
-
     local players = GetPlayers()
     for i, src in ipairs(players) do
         local plyLicense = VyHub.Player:get_license(src)

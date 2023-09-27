@@ -2,6 +2,8 @@ VyHub.Player = VyHub.Player or {}
 
 VyHub.Player.connect_queue = VyHub.Player.connect_queue or {}
 VyHub.Player.table = VyHub.Player.table or {}
+VyHub.Player.src_map = VyHub.Player.src_map or {}
+VyHub.Player.last_known_groups = VyHub.Player.last_known_groups or {}
 
 function VyHub.Player:initialize(ply, retry)
     if ply == nil then return end
@@ -15,6 +17,7 @@ function VyHub.Player:initialize(ply, retry)
         VyHub:msg(f("Found existing user %s for license %s (%s).", result.id, license, nick), "success")
         result.src = ply
         VyHub.Player.table[license] = result
+        VyHub.Player.src_map[license] = src
 
         VyHub.Player:refresh(ply, _, true)
 
@@ -118,6 +121,9 @@ function VyHub.Player:check_group(ply, callback)
         VyHub.API:get("/user/%s/group", {user.id}, { serverbundle_id = VyHub.server.serverbundle_id }, function(code, result)
             local highest = nil
 
+            local currentGroup = VyHub.Framework:getPlayerGroup(ply)
+            VyHub.Player.last_known_groups[license] = currentGroup
+
             for _, group in pairs(result) do
                 if highest == nil or highest.permission_level < group.permission_level then
                     highest = group
@@ -125,7 +131,7 @@ function VyHub.Player:check_group(ply, callback)
             end
 
             if highest == nil then
-                VyHub:msg(f("Could not find any active group for %s (%s)", GetPlayerName(ply), license), "error")
+                VyHub:msg(f("Could not find any active group for %s (%s)", GetPlayerName(ply), license), "debug")
                 return
             end
 
@@ -139,13 +145,13 @@ function VyHub.Player:check_group(ply, callback)
             end
 
             if group == nil then
-                VyHub:msg(f("Could not find group name mapping for group %s.", highest.name), "error")
+                VyHub:msg(f("Could not find group name mapping for group %s.", highest.name), "debug")
                 return
             end
 
-            local currentGroup = VyHub.Framework:getPlayerGroup(ply)
             if currentGroup and currentGroup ~= group then
                 VyHub.Framework:setPlayerGroup(ply, group)
+                VyHub.Util:print_chat_license(license, f(VyHub.lang.ply.group_changed, group))
                 VyHub:msg(f("Added %s to group %s (was %s before)", GetPlayerName(ply), group, currentGroup), "success")
             end
         end, function()
@@ -155,6 +161,8 @@ function VyHub.Player:check_group(ply, callback)
 end
 
 function VyHub.Player:refresh(ply, callback, ignore_group)
+    if not ply then return end
+
     if not ignore_group then
         VyHub.Player:check_group(ply)
     end
@@ -209,7 +217,11 @@ function VyHub.Player:check_property(license, property)
     return false
 end
 
-AddEventHandler('playerConnecting', function(name, setCallback, deferrals)    local source = source -- PlayerID
+AddEventHandler('playerConnecting', function(name, setCallback, deferrals)    
+    local source = source -- PlayerID
+
+    if not source then return end
+
     deferrals.defer()
     Wait(0)
     deferrals.update("[VyHub] Checking Userdata")
@@ -223,9 +235,11 @@ RegisterNetEvent("vyhub-fivem:playerLoaded", function()
     local src = source
     local license = VyHub.Player:get_license(src)
 
+    if not source or not license then return end
+
     local ply_timer_name = "vyhub_player_" .. license
 
-    VyHub.Util:timer_loop(60000, function() 
+    VyHub.Util:timer_loop(300000, function() 
         local ping = GetPlayerPing(src)
         if not ping or ping <= 0 then
             VyHub:msg("Player not available anymore")
@@ -237,6 +251,10 @@ RegisterNetEvent("vyhub-fivem:playerLoaded", function()
     end, ply_timer_name)
 
     VyHub.Player:refresh(license, callback)
+
+    Citizen.SetTimeout(30000, function()  
+        VyHub.Player:refresh(license, callback)
+    end)
 end)
 
 function VyHub.Player:get_license(player)
@@ -248,6 +266,10 @@ function VyHub.Player:get_license(player)
 end
 
 function VyHub.Player:get_source(license)
+    if VyHub.Player.src_map[license] then
+        return VyHub.Player.src_map[license]
+    end
+
     local players = GetPlayers()
     for i, src in ipairs(players) do
         local playerLicense = VyHub.Player:get_license(src)

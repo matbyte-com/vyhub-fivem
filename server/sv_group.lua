@@ -41,7 +41,7 @@ function VyHub.Group:set(license, groupname, seconds, processor_id, callback)
     local group = VyHub.groups_mapped[groupname]
 
     if group == nil then
-        VyHub:msg(f("Could not find VyHub group with name '%s'", groupname), "error")
+        VyHub:msg(f("Could not find VyHub group with name '%s'", groupname), "debug")
 
         if callback then
             callback(false)
@@ -141,17 +141,22 @@ AddStateBagChangeHandler("group", nil, function(bagName, key, value, reserved, r
     if(not ply or ply <= 0) then
         return
     end
-    local plyLicense = VyHub.Player:get_license(ply)
+    local license = VyHub.Player:get_license(ply)
     local currentGroup = VyHub.Framework:getPlayerGroup(ply)
-    
+    if not currentGroup then return end
+
     if VyHub.Group.group_changes[ply] == value then
+        VyHub.Group.group_changes[ply] = nil
         return
     end
 
-    if not currentGroup then return end
+    if VyHub.Player.last_known_groups[license] == value then return end
 
-    VyHub:msg(f("Detected group change of player %s to group %s (from %s)", plyLicense, value, currentGroup))
-    VyHub.Group:set(plyLicense, value)
+    VyHub:msg(f("Detected group change of player %s to group %s (from %s)", license, value, VyHub.Player.last_known_groups[license]), "debug")
+
+    VyHub.Group:set(license, value)
+
+    VyHub.Player.last_known_groups[license] = value
 end)
 
 

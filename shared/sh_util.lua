@@ -1,5 +1,6 @@
 VyHub.Util = VyHub.Util or {}
 VyHub.Util.cancelled_timers = VyHub.Util.cancelled_timers or {}
+VyHub.Util.timer_fns = VyHub.Util.timer_fns or {}
 
 
 function VyHub.Util:format_datetime(unix_timestamp)
@@ -153,6 +154,10 @@ function VyHub.Util:timer_loop(delay, callback, name)
         VyHub.Util.cancelled_timers[name] = nil
     end
 
+    if name then
+        VyHub.Util.timer_fns[name] = callback
+    end
+
     Citizen.CreateThread(function()
         while(true) do
             Citizen.Wait(delay)
@@ -161,7 +166,11 @@ function VyHub.Util:timer_loop(delay, callback, name)
                 break
             end
 
-            callback()
+            if name then
+                VyHub.Util.timer_fns[name]()
+            else
+                callback()
+            end
         end
     end)
 end
