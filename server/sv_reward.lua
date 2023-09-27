@@ -142,7 +142,7 @@ function VyHub.Reward:exec_rewards(event, license)
 
                         if lua_str ~= nil then
                             lua_str = VyHub.Reward:do_string_replacements(lua_str, license, areward)
-                            assert(load(f("local PLAYER = VyHub.Player:get_source('%s') %s", license, lua_str)))()
+                            assert(load(lua_str))()
                         end
                     else
                         VyHub:msg(f("No implementation for reward type %s", reward.type) "warning")
@@ -189,6 +189,7 @@ function VyHub.Reward:do_string_replacements(inp_str, license, areward)
 
     local replacements = {
         ["id"] = playerSource,
+        ["user_id"] = areward.user.id,
         ["nick"] = GetPlayerName(playerSource),
         ["esx_name"] = esx_name,
         ["steam_id"] = steam_id,
