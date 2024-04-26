@@ -1,1 +1,1 @@
-- Initial Release
+- Add `%license%` as string replacement for rewards

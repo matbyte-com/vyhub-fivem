@@ -191,6 +191,7 @@ function VyHub.Reward:do_string_replacements(inp_str, license, areward)
         ["id"] = playerSource,
         ["user_id"] = areward.user.id,
         ["nick"] = GetPlayerName(playerSource),
+        ["license"] = license,
         ["esx_name"] = esx_name,
         ["steam_id"] = steam_id,
         ["applied_packet_id"] = areward.applied_packet_id,
