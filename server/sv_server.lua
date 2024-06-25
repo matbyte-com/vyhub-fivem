@@ -24,19 +24,18 @@ function VyHub.Server:update_status()
         local plyData = VyHub.Player.table[license]
         if (plyData ~= nil) then
             local nickname = GetPlayerName(src)
-            local coords = GetEntityCoords(GetPlayerPed(src))
             local ping = GetPlayerPing(src)
-            local xPlayer = VyHub.Framework:getPlayerFromId(src)
 
-            if xPlayer then
-                nickname = xPlayer.getName()
+            local char_name = VyHub.Framework:getPlayerCharName(src)
+
+            if char_name then
+                nickname = char_name
             end
 
             table.insert(user_activities, {
                 user_id = plyData.id,
                 extra = {
                     Nickname = nickname,
-                    Coords = f("%.2f, %.2f, %.2f", coords.x, coords.y, coords.z),
                     Ping = f("%i ms", ping)
                 }
             })

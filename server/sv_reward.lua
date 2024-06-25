@@ -171,14 +171,10 @@ function VyHub.Reward:do_string_replacements(inp_str, license, areward)
 
     local playerSource = VyHub.Player:get_source(license)
 
-    local esx_name = '-'
+    local char_name = VyHub.Framework:getPlayerCharName(playerSource)
 
-    if ESX then
-        local esx_player = ESX.GetPlayerFromId(playerSource)
-
-        if esx_player then
-            esx_name = esx_player.getName()
-        end
+    if not char_name then
+        char_name = '-'
     end
 
     local steam_id = VyHub.Player:get_steamid(playerSource)
@@ -192,7 +188,7 @@ function VyHub.Reward:do_string_replacements(inp_str, license, areward)
         ["user_id"] = areward.user.id,
         ["nick"] = GetPlayerName(playerSource),
         ["license"] = license,
-        ["esx_name"] = esx_name,
+        ["char_name"] = char_name,
         ["steam_id"] = steam_id,
         ["applied_packet_id"] = areward.applied_packet_id,
         ["packet_title"] = areward.applied_packet.packet.title,

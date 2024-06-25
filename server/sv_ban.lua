@@ -283,7 +283,7 @@ function VyHub.Ban:clear()
 end
 
 function VyHub.Ban:create_ban_msg(ban)
-    local msg = VyHub.Config.ban_message or "You have been banned. %reason% - %ban_date%, %unban_date%, %admin%"
+    local msg = VyHub.Config.ban_message or "You have been banned. Reason: %reason% | Admin: %admin% | Unban date: %unban_date%"
 
     local created_on = VyHub.Util:iso_ts_to_local_str(ban.created_on)
     local ends_on = (ban.ends_on ~= nil and VyHub.Util:iso_ts_to_local_str(ban.ends_on) or VyHub.lang.other.never)

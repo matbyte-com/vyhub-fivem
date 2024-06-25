@@ -36,13 +36,12 @@ end
 
 RegisterNetEvent("vyhub_lang_loaded", function()
     while (not VyHub.Dashboard.html_loaded) do
-        Citizen.Wait(50)
+        Citizen.Wait(500)
     end
-    local license = VyHub.Framework:getLicense()
     SendNUIMessage({
         type = "init",
         data = {
-            license = license,
+            license = VyHub.client_license,
             lang = VyHub.lang
         }
     })

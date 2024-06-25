@@ -6,7 +6,6 @@ description ''
 version '1.0.0'
 
 shared_scripts {
-    '@es_extended/imports.lua',
     'init.lua',
     'config/sh_config.lua',
     'shared/*.lua',

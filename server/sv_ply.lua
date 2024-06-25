@@ -4,6 +4,7 @@ VyHub.Player.connect_queue = VyHub.Player.connect_queue or {}
 VyHub.Player.table = VyHub.Player.table or {}
 VyHub.Player.src_map = VyHub.Player.src_map or {}
 VyHub.Player.last_known_groups = VyHub.Player.last_known_groups or {}
+VyHub.Player.properties = VyHub.Player.properties or {}
 
 function VyHub.Player:initialize(ply, retry)
     if ply == nil then return end
@@ -11,13 +12,14 @@ function VyHub.Player:initialize(ply, retry)
     local license = VyHub.Player:get_license(ply)
     local nick = GetPlayerName(ply)
 
+    VyHub.Player.src_map[license] = ply
+
     VyHub:msg(f("Initializing user %s, %s", nick, license))
 
     VyHub.API:get("/user/%s", {license}, {type = "FIVEM"}, function(code, result)
         VyHub:msg(f("Found existing user %s for license %s (%s).", result.id, license, nick), "success")
         result.src = ply
         VyHub.Player.table[license] = result
-        VyHub.Player.src_map[license] = src
 
         VyHub.Player:refresh(ply, _, true)
 
@@ -48,7 +50,7 @@ function VyHub.Player:initialize(ply, retry)
         end, function ()
             VyHub.Player:initialize(ply, true)
         end)
-    end, { 404 })
+    end, { [404] = true })
 end
 
 function VyHub.Player:create(license, success, err)
@@ -116,43 +118,82 @@ function VyHub.Player:check_group(ply, callback)
             return
         end
 
-        return
-
-        VyHub.API:get("/user/%s/group", {user.id}, { serverbundle_id = VyHub.server.serverbundle_id }, function(code, result)
-            local highest = nil
-
-            local currentGroup = VyHub.Framework:getPlayerGroup(ply)
-            VyHub.Player.last_known_groups[license] = currentGroup
-
-            for _, group in pairs(result) do
-                if highest == nil or highest.permission_level < group.permission_level then
-                    highest = group
+        VyHub.API:get("/user/%s/group", {user.id}, { serverbundle_id = VyHub.server.serverbundle_id }, function(code, groups)
+            local new_props = {}
+            for _, group in pairs(groups) do
+                for _, prop in pairs(group.properties) do
+                    if prop.granted then
+                        new_props[prop.name] = true
+                    end
                 end
             end
+            VyHub.Player.properties = new_props
 
-            if highest == nil then
-                VyHub:msg(f("Could not find any active group for %s (%s)", GetPlayerName(ply), license), "debug")
-                return
-            end
+            if ESX then
+                local highest = nil
 
-            local group = nil
+                local currentGroups = VyHub.Framework:getPlayerGroups(ply)
+                local currentGroup = nil
 
-            for _, mapping in pairs(highest.mappings) do
-                if mapping.serverbundle_id == nil or mapping.serverbundle_id == VyHub.server.serverbundle.id then
-                    group = mapping.name
-                    break
+                if #currentGroups > 0 then
+                    currentGroup = currentGroups[1]
                 end
-            end
 
-            if group == nil then
-                VyHub:msg(f("Could not find group name mapping for group %s.", highest.name), "debug")
-                return
-            end
+                VyHub.Player.last_known_groups[license] = currentGroup
 
-            if currentGroup and currentGroup ~= group then
-                VyHub.Framework:setPlayerGroup(ply, group)
-                VyHub.Util:print_chat_license(license, f(VyHub.lang.ply.group_changed, group))
-                VyHub:msg(f("Added %s to group %s (was %s before)", GetPlayerName(ply), group, currentGroup), "success")
+                for _, group in pairs(groups) do
+                    if highest == nil or highest.permission_level < group.permission_level then
+                        highest = group
+                    end
+                end
+
+                if highest == nil then
+                    VyHub:msg(f("Could not find any active group for %s (%s)", GetPlayerName(ply), license), "debug")
+                    return
+                end
+
+                local group = VyHub.groups_mapped_reversed[highest.id]
+
+                if group == nil then
+                    VyHub:msg(f("Could not find group name mapping for group %s.", highest.name), "debug")
+                    return
+                end
+
+                if currentGroup and currentGroup ~= group then
+                    VyHub.Framework:setPlayerGroup(ply, group)
+                    VyHub.Util:print_chat_license(license, f(VyHub.lang.ply.group_changed, group))
+                    VyHub:msg(f("Added %s to group %s (was %s before)", GetPlayerName(ply), group, currentGroup), "success")
+                end
+            else
+                --[[ VyHub:msg(f("Checking groups for %s", GetPlayerName(ply)), "debug")
+                local vyhub_groups = {}
+
+                -- Add missing permissions
+                for _, group in pairs(groups) do
+                    local groupname = VyHub.groups_mapped_reversed[group.id]
+
+                    if groupname then
+                        vyhub_groups[groupname] = true
+
+                        VyHub:msg(f("Player %s Group %s has: %s", ply, groupname, IsPlayerAceAllowed(ply, f("vyhub.group.%s", groupname))), "debug")
+
+                        if not IsPlayerAceAllowed(ply, f("vyhub.group.%s", groupname)) then
+                            ExecuteCommand(('add_principal identifier.license:%s %s'):format(license, groupname))
+                            VyHub.Util:print_chat_license(license, f(VyHub.lang.ply.group_changed, groupname))
+                            VyHub:msg(f("Added %s to group %s", GetPlayerName(ply), groupname), "success")
+                        end
+                    else
+                        VyHub:msg(f("Could not find group name mapping for group %s.", group.name), "debug")
+                    end
+                end
+
+                -- Remove permissions
+                for groupname, _ in pairs(VyHub.groups_mapped) do
+                    if not vyhub_groups[groupname] and IsPlayerAceAllowed(ply, f("vyhub.group.%s", groupname)) then
+                        ExecuteCommand(('remove_principal identifier.license:%s %s'):format(license, groupname))
+                        VyHub:msg(f("Removed %s from group %s", GetPlayerName(ply), groupname), "success")
+                    end
+                end ]]
             end
         end, function()
             
@@ -193,24 +234,29 @@ function VyHub.Player:check_username(ply)
 end
 
 
-function VyHub.Player:get_group(license)
+function VyHub.Player:get_groups(license)
     local plySrc = VyHub.Player:get_source(license)
-    local playerGroup = VyHub.Framework:getPlayerGroup(plySrc)
-    return VyHub.groups_mapped[playerGroup]
+    local playerGroups = VyHub.Framework:getPlayerGroups(plySrc)
+
+    local groups = {}
+
+    for _, groupname in pairs(playerGroups) do
+        local group = VyHub.groups_mapped[groupname]
+
+        if group then
+            groups[groupname] = group
+        end
+    end 
+
+    return groups
 end
 
 function VyHub.Player:check_property(license, property)
-    local group = VyHub.Player:get_group(license)
-
-    if (group) then
-        local prop = group.properties[property]
-
-        if (prop and prop.granted) then
-            return true 
-        end
+    if VyHub.Player.properties[property] then
+        return true
     end
 
-    if (VyHub.Player.table[license]) then
+    if VyHub.Player.table[license] then
         return VyHub.Player.table[license].admin
     end 
 
@@ -235,6 +281,8 @@ RegisterNetEvent("vyhub-fivem:playerLoaded", function()
     local src = source
     local license = VyHub.Player:get_license(src)
 
+    VyHub:msg("Player " .. src .." loaded. License: " .. license, "debug")
+
     if not source or not license then return end
 
     local ply_timer_name = "vyhub_player_" .. license
@@ -242,7 +290,7 @@ RegisterNetEvent("vyhub-fivem:playerLoaded", function()
     VyHub.Util:timer_loop(300000, function() 
         local ping = GetPlayerPing(src)
         if not ping or ping <= 0 then
-            VyHub:msg("Player not available anymore")
+            VyHub:msg("Player " .. src .." not available anymore", "debug")
             VyHub.Util:cancel_timer(ply_timer_name)
             return
         end
@@ -250,10 +298,10 @@ RegisterNetEvent("vyhub-fivem:playerLoaded", function()
         VyHub.Player:refresh(src)
     end, ply_timer_name)
 
-    VyHub.Player:refresh(license, callback)
+    VyHub.Player:refresh(src, callback)
 
     Citizen.SetTimeout(30000, function()  
-        VyHub.Player:refresh(license, callback)
+        VyHub.Player:refresh(src, callback)
     end)
 end)
 
@@ -287,3 +335,11 @@ function VyHub.Player:get_steamid(player)
 	end
 end
 
+RegisterNetEvent("vyhub-fivem:clientInfo", function()
+    local src = source
+    local license = VyHub.Player:get_license(src)
+
+    if license then
+        TriggerClientEvent("vyhub-fivem:clientInfo", src, license)
+    end
+end)
