@@ -135,6 +135,7 @@ function VyHub.Reward:exec_rewards(event, license)
                     if reward.type == RewardType.COMMAND then
                         if data.command ~= nil then
                             local cmd = VyHub.Reward:do_string_replacements(data.command, license, areward)
+                            VyHub:msg(f("Executing reward %s for user %s: %s", reward.type, license, cmd))
                             ExecuteCommand(cmd)
                         end
                     elseif reward.type == RewardType.SCRIPT then
@@ -142,13 +143,12 @@ function VyHub.Reward:exec_rewards(event, license)
 
                         if lua_str ~= nil then
                             lua_str = VyHub.Reward:do_string_replacements(lua_str, license, areward)
+                            VyHub:msg(f("Executing reward %s for user %s: %s", reward.type, license, lua_str))
                             assert(load(lua_str))()
                         end
                     else
                         VyHub:msg(f("No implementation for reward type %s", reward.type) "warning")
                     end
-
-                    VyHub:msg(f("Executed reward %s for user %s: %s", reward.type, license, json.encode(data)))
 
                     if se and reward.once then
                         VyHub.Reward:set_executed(areward.id)
