@@ -6,7 +6,7 @@ if (IsDuplicityVersion()) then
         local encoded_en = LoadResourceFile(GetCurrentResourceName(), "/lang/en.json")
 
         if (encoded_en == nil) then
-            VyHub:msg("Missing language file en.json!!!", "error")
+            VyHub:msg("Missing language file en.json!!! PLEASE MAKE SURE TO DOWNLOAD VYHUB-FIVEM ON THE GITHUB RELEASES PAGE! https://github.com/matbyte-com/vyhub-fivem/releases", "error")
             return
         end
 
