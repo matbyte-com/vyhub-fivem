@@ -114,7 +114,7 @@ if ESX then
         end
         local license = VyHub.Player:get_license(ply)
         local currentGroups = VyHub.Framework:getPlayerGroups(ply)
-        if currentGroups == nil or #current_groups == 0 then return end
+        if #currentGroups == 0 then return end
         local currentGroup = currentGroups[1]
         if not currentGroup then return end
 
