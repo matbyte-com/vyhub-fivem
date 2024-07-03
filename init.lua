@@ -6,9 +6,9 @@ f = string.format
 ESX = nil 
 QBCore = nil
 
-if exports["qb-core"] then
+if GetResourceState("qb-core") == "started" then
     QBCore = exports["qb-core"]:GetCoreObject()
-elseif exports["es_extended"] then
+elseif GetResourceState("es_extended") == "started" then
     ESX = exports["es_extended"]:getSharedObject()
 end
 
